@@ -512,10 +512,13 @@ int SelectCard(char *line)
 int GetOpt(int argn,char **args)
 {
   int c,rt;
+  int ntmp;
   int option_index = 0;
   int this_option_optind;
+  char *endp;
   struct option long_options[] =
   {
+    {"version",1,0,'M'},
     {"default",0,0,'D'},
     {"debug",0,0,'d'},
     {"reverse",0,0,'r'},
@@ -532,6 +535,16 @@ int GetOpt(int argn,char **args)
 
     switch(c)
     {
+      case 'M':
+        errno = 0;
+        ntmp = strtol(optarg,&endp,10);
+        if(errno!=ERANGE && *endp=='\0' && (ntmp==MOD_V4||ntmp==MOD_V5)) mod_v = ntmp;
+        else
+        {
+          fprintf(stderr,"MODTRAN version -> out of range %s\n",optarg);
+          rt = -1;
+        }
+        break;
       case 'D':
         strncpy(dname,optarg,MAXLINE);
         break;
@@ -602,6 +615,7 @@ int Usage(void)
   fprintf(stderr,"write_tape5 -[option] (argument) -[option] (argument) ...\n");
   fprintf(stderr,"-----------------------------------------------------------------------------\n");
   fprintf(stderr,"   option   |%s|%s|%s| current\n",As(e,"",n),         As(a,"argument",n),   As(d,"default",n));
+  fprintf(stderr," M -version |%s|%s|%s| %d\n",As(e,"MODTRAN version",n),As(a,"4000|5000",n), Ad(d,MOD_V4,n),mod_v);
   fprintf(stderr," D -default |%s|%s|%s| %s\n",As(e,"Default input",n), As(a,"file name",n),  As(d,DNAME,n),dname);
   fprintf(stderr," d -debug   |%s|%s|%s| %d\n",As(e,"Debug   mode",n),  As(a,"nothing",n),    Ad(d,0,n),db);
   fprintf(stderr," r -reverse |%s|%s|%s| %d\n",As(e,"Reverse mode",n),  As(a,"nothing",n),    Ad(d,0,n),rv);

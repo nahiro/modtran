@@ -19,13 +19,15 @@
 #define	NCOL4				4
 #define	NCOL5				5
 #define	NCOL6				6
-#define MAXLINE				256
+#define	MAXLINE				256
+#define	MOD_V4				4000			// MODTRAN version 4
+#define	MOD_V5				5000			// MODTRAN version 5
 #define	NCARD				38
 #define	CARD_LENGTH			256
 #define	CARD2C1_JCHAR_NINDX		14
 #define	CARD2C2_WMOL_NINDX		9
 #define	CARD2C2X_WMOLX_NINDX		13
-#define	CARD1_NPAR			17
+#define	CARD1_NPAR			20
 #define	CARD1A_NPAR			13
 #define	CARD1A1_NPAR			1
 #define	CARD1A2_NPAR			1
@@ -64,10 +66,14 @@
 #define	CARD4L2_NPAR			1
 #define	CARD5_NPAR			1
 
+int	mod_v	= MOD_V4;
+
 typedef struct
 {
   char		MODTRN[CARD_LENGTH];
   char		SPEED[CARD_LENGTH];
+  char		BINARY[CARD_LENGTH];
+  char		LYMOLC[CARD_LENGTH];
   int		MODEL;
   int		ITYPE;
   int		IEMSCT;
@@ -80,6 +86,7 @@ typedef struct
   int		M6;
   int		MDEF;
   int		IM;
+  int		I_RD2C;
   int		NOPRNT;
   double	TPTEMP;
   char		SURREF[CARD_LENGTH];
