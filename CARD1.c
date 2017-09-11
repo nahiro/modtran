@@ -88,9 +88,38 @@ void CARD1_print(const TAPE5_struct *t,FILE *fp)
   int n;
   char s[MAXLINE];
 
-  for(n=0; n<CARD1_NPAR; n++)
+  switch(mod_v)
   {
-    fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD1_ID,CARD1_name[n],CARD1_to_s(t->card1,n,s),CARD1_description[n]);
+    case MOD_V4:
+      for(n=0; n<CARD1_NPAR; n++)
+      {
+        switch(n)
+        {
+          case 2:
+          case 3:
+          case 16:
+            break;
+          default:
+            fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD1_ID,CARD1_name[n],CARD1_to_s(t->card1,n,s),CARD1_description[n]);
+            break;
+        }
+      }
+      break;
+    case MOD_V5:
+      for(n=0; n<CARD1_NPAR; n++)
+      {
+        switch(n)
+        {
+          case 15:
+            break;
+          default:
+            fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD1_ID,CARD1_name[n],CARD1_to_s(t->card1,n,s),CARD1_description[n]);
+            break;
+        }
+      }
+      break;
+    default:
+      break;
   }
 }
 
