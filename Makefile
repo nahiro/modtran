@@ -40,10 +40,16 @@ clean				:
 				rm -f $(OBJS)
 write_tape5			: write_tape5.c $(OBJ1)
 				$(CC) $@.c $(OBJ1) -o $(BINDIR)/$@ $(LIB0) $(WARNING)
+write_tape5_org			: write_tape5.c $(OBJ1)
+				$(CC) write_tape5.c $(OBJ1) -o $(BINDIR)/$@ $(LIB0) $(WARNING) -DOLDMODE
 pfunc				: pfunc.c $(OBJ1)
 				$(CC) $@.c $(OBJ1) -o $(BINDIR)/$@ $(LIB0) $(WARNING)
 run_modtran			: run_modtran.c $(OBJ1) $(OBJ3) $(OBJ4) $(OBJ5)
 				$(CC) -c -o $(BINDIR)/$@.o $@.c
+				$(FC) -o $(BINDIR)/$@ $(BINDIR)/$@.o $(OBJ1) $(OBJ3) $(OBJ4) $(OBJ5) $(LIB0) $(CFLAGS) $(WARNING) -mcmodel=large
+				rm -f $(BINDIR)/$@.o
+run_modtran_org			: run_modtran.c $(OBJ1) $(OBJ3) $(OBJ4) $(OBJ5)
+				$(CC) -c -o $(BINDIR)/$@.o run_modtran.c -DOLDMODE
 				$(FC) -o $(BINDIR)/$@ $(BINDIR)/$@.o $(OBJ1) $(OBJ3) $(OBJ4) $(OBJ5) $(LIB0) $(CFLAGS) $(WARNING) -mcmodel=large
 				rm -f $(BINDIR)/$@.o
 run_modtran5			: run_modtran5.c $(OBJ1) $(OBJ3)
