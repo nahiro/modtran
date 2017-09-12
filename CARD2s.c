@@ -15,25 +15,52 @@ void CARD2s_write(const TAPE5_struct *t)
   {
     CARD2B_write(t,stdout);
   }
-  if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->IM==1)
+  switch(mod_v)
   {
-    CARD2C_write(t,stdout);
-    for(i=0; i<t->card2c->ML; i++)
-    {
-      CARD2C1_write((t->card2c1)+i,stdout);
-      if(t->card2c->IRD1 == 1)
+    case MOD_V4:
+      if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->IM==1)
       {
-        CARD2C2_write((t->card2c2)+i,stdout);
-        if(t->card1->MDEF == 2)
+        CARD2C_write(t,stdout);
+        for(i=0; i<t->card2c->ML; i++)
         {
-          CARD2C2X_write((t->card2c2x)+i,stdout);
+          CARD2C1_write((t->card2c1)+i,stdout);
+          if(t->card2c->IRD1 == 1)
+          {
+            CARD2C2_write((t->card2c2)+i,stdout);
+            if(t->card1->MDEF == 2)
+            {
+              CARD2C2X_write((t->card2c2x)+i,stdout);
+            }
+          }
+          if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+          {
+            CARD2C3_write(t,i,stdout);
+          }
         }
       }
-      if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+      break;
+    case MOD_V5:
+      if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->I_RD2C==1)
       {
-        CARD2C3_write(t,i,stdout);
+        CARD2C_write(t,stdout);
+        for(i=0; i<t->card2c->ML; i++)
+        {
+          CARD2C1_write((t->card2c1)+i,stdout);
+          if(t->card2c->IRD1 == 1)
+          {
+            CARD2C2_write((t->card2c2)+i,stdout);
+            if(t->card1->MDEF == 2)
+            {
+              CARD2C2X_write((t->card2c2x)+i,stdout);
+            }
+          }
+          if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+          {
+            CARD2C3_write(t,i,stdout);
+          }
+        }
       }
-    }
+      break;
   }
   if(t->card2->IHAZE==7 || t->card2->ICLD==11 || strncmp(t->card2->ARUSS,"USS",3)==0)
   {
