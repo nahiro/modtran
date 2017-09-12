@@ -152,44 +152,44 @@ int CARD1_read(TAPE5_struct *t,FILE *fp)
   switch(mod_v)
   {
     case MOD_V4:
-      if(get_upp(line,n,1,t->card1->MODTRN)  < 0) rt =  1; n += 1;
-      if(get_upp(line,n,1,t->card1->SPEED)   < 0) rt =  2; n += 1;
-      if(get_int(line,n,3,&t->card1->MODEL)  < 0) rt =  3; n += 3;
-      if(get_int(line,n,5,&t->card1->ITYPE)  < 0) rt =  4; n += 5;
-      if(get_int(line,n,5,&t->card1->IEMSCT) < 0) rt =  5; n += 5;
-      if(get_int(line,n,5,&t->card1->IMULT)  < 0) rt =  6; n += 5;
-      if(get_int(line,n,5,&t->card1->M1)     < 0) rt =  7; n += 5;
-      if(get_int(line,n,5,&t->card1->M2)     < 0) rt =  8; n += 5;
-      if(get_int(line,n,5,&t->card1->M3)     < 0) rt =  9; n += 5;
-      if(get_int(line,n,5,&t->card1->M4)     < 0) rt = 10; n += 5;
-      if(get_int(line,n,5,&t->card1->M5)     < 0) rt = 11; n += 5;
-      if(get_int(line,n,5,&t->card1->M6)     < 0) rt = 12; n += 5;
-      if(get_int(line,n,5,&t->card1->MDEF)   < 0) rt = 13; n += 5;
-      if(get_int(line,n,5,&t->card1->IM)     < 0) rt = 14; n += 5;
-      if(get_int(line,n,5,&t->card1->NOPRNT) < 0) rt = 15; n += 5;
-      if(get_dbl(line,n,8,&t->card1->TPTEMP) < 0) rt = 16; n += 8;
-      if(get_upp(line,n,7,t->card1->SURREF)  < 0) rt = 17;
+      if(get_upp(line,n,1,t->card1->MODTRN)  < 0) rt = I_CARD1_MODTRN; n += 1;
+      if(get_upp(line,n,1,t->card1->SPEED)   < 0) rt = I_CARD1_SPEED;  n += 1;
+      if(get_int(line,n,3,&t->card1->MODEL)  < 0) rt = I_CARD1_MODEL;  n += 3;
+      if(get_int(line,n,5,&t->card1->ITYPE)  < 0) rt = I_CARD1_ITYPE;  n += 5;
+      if(get_int(line,n,5,&t->card1->IEMSCT) < 0) rt = I_CARD1_IEMSCT; n += 5;
+      if(get_int(line,n,5,&t->card1->IMULT)  < 0) rt = I_CARD1_IMULT;  n += 5;
+      if(get_int(line,n,5,&t->card1->M1)     < 0) rt = I_CARD1_M1;     n += 5;
+      if(get_int(line,n,5,&t->card1->M2)     < 0) rt = I_CARD1_M2;     n += 5;
+      if(get_int(line,n,5,&t->card1->M3)     < 0) rt = I_CARD1_M3;     n += 5;
+      if(get_int(line,n,5,&t->card1->M4)     < 0) rt = I_CARD1_M4;     n += 5;
+      if(get_int(line,n,5,&t->card1->M5)     < 0) rt = I_CARD1_M5;     n += 5;
+      if(get_int(line,n,5,&t->card1->M6)     < 0) rt = I_CARD1_M6;     n += 5;
+      if(get_int(line,n,5,&t->card1->MDEF)   < 0) rt = I_CARD1_MDEF;   n += 5;
+      if(get_int(line,n,5,&t->card1->IM)     < 0) rt = I_CARD1_IM;     n += 5;
+      if(get_int(line,n,5,&t->card1->NOPRNT) < 0) rt = I_CARD1_NOPRNT; n += 5;
+      if(get_dbl(line,n,8,&t->card1->TPTEMP) < 0) rt = I_CARD1_TPTEMP; n += 8;
+      if(get_upp(line,n,7,t->card1->SURREF)  < 0) rt = I_CARD1_SURREF;
       break;
     case MOD_V5:
-      if(get_upp(line,n,1,t->card1->MODTRN)  < 0) rt =  1; n += 1;
-      if(get_upp(line,n,1,t->card1->SPEED)   < 0) rt =  2; n += 1;
-      if(get_upp(line,n,1,t->card1->BINARY)  < 0) rt =  3; n += 1;
-      if(get_upp(line,n,1,t->card1->LYMOLC)  < 0) rt =  4; n += 1;
-      if(get_int(line,n,1,&t->card1->MODEL)  < 0) rt =  5; n += 1;
-      if(get_int(line,n,5,&t->card1->ITYPE)  < 0) rt =  6; n += 5;
-      if(get_int(line,n,5,&t->card1->IEMSCT) < 0) rt =  7; n += 5;
-      if(get_int(line,n,5,&t->card1->IMULT)  < 0) rt =  8; n += 5;
-      if(get_int(line,n,5,&t->card1->M1)     < 0) rt =  9; n += 5;
-      if(get_int(line,n,5,&t->card1->M2)     < 0) rt = 10; n += 5;
-      if(get_int(line,n,5,&t->card1->M3)     < 0) rt = 11; n += 5;
-      if(get_int(line,n,5,&t->card1->M4)     < 0) rt = 12; n += 5;
-      if(get_int(line,n,5,&t->card1->M5)     < 0) rt = 13; n += 5;
-      if(get_int(line,n,5,&t->card1->M6)     < 0) rt = 14; n += 5;
-      if(get_int(line,n,5,&t->card1->MDEF)   < 0) rt = 15; n += 5;
-      if(get_int(line,n,5,&t->card1->I_RD2C) < 0) rt = 16; n += 5;
-      if(get_int(line,n,5,&t->card1->NOPRNT) < 0) rt = 17; n += 5;
-      if(get_dbl(line,n,8,&t->card1->TPTEMP) < 0) rt = 18; n += 8;
-      if(get_upp(line,n,7,t->card1->SURREF)  < 0) rt = 19;
+      if(get_upp(line,n,1,t->card1->MODTRN)  < 0) rt = I_CARD1_MODTRN; n += 1;
+      if(get_upp(line,n,1,t->card1->SPEED)   < 0) rt = I_CARD1_SPEED;  n += 1;
+      if(get_upp(line,n,1,t->card1->BINARY)  < 0) rt = I_CARD1_BINARY; n += 1;
+      if(get_upp(line,n,1,t->card1->LYMOLC)  < 0) rt = I_CARD1_LYMOLC; n += 1;
+      if(get_int(line,n,1,&t->card1->MODEL)  < 0) rt = I_CARD1_MODEL;  n += 1;
+      if(get_int(line,n,5,&t->card1->ITYPE)  < 0) rt = I_CARD1_ITYPE;  n += 5;
+      if(get_int(line,n,5,&t->card1->IEMSCT) < 0) rt = I_CARD1_IEMSCT; n += 5;
+      if(get_int(line,n,5,&t->card1->IMULT)  < 0) rt = I_CARD1_IMULT;  n += 5;
+      if(get_int(line,n,5,&t->card1->M1)     < 0) rt = I_CARD1_M1;     n += 5;
+      if(get_int(line,n,5,&t->card1->M2)     < 0) rt = I_CARD1_M2;     n += 5;
+      if(get_int(line,n,5,&t->card1->M3)     < 0) rt = I_CARD1_M3;     n += 5;
+      if(get_int(line,n,5,&t->card1->M4)     < 0) rt = I_CARD1_M4;     n += 5;
+      if(get_int(line,n,5,&t->card1->M5)     < 0) rt = I_CARD1_M5;     n += 5;
+      if(get_int(line,n,5,&t->card1->M6)     < 0) rt = I_CARD1_M6;     n += 5;
+      if(get_int(line,n,5,&t->card1->MDEF)   < 0) rt = I_CARD1_MDEF;   n += 5;
+      if(get_int(line,n,5,&t->card1->I_RD2C) < 0) rt = I_CARD1_I_RD2C; n += 5;
+      if(get_int(line,n,5,&t->card1->NOPRNT) < 0) rt = I_CARD1_NOPRNT; n += 5;
+      if(get_dbl(line,n,8,&t->card1->TPTEMP) < 0) rt = I_CARD1_TPTEMP; n += 8;
+      if(get_upp(line,n,7,t->card1->SURREF)  < 0) rt = I_CARD1_SURREF;
       break;
   }
   if(rt)
@@ -293,7 +293,7 @@ int CARD1_gets(char *line,TAPE5_struct *t)
     case MOD_V4:
       switch(n)
       {
-        case I_CARD1_MODTRAN:
+        case I_CARD1_MODTRN:
           strncpy(t->card1->MODTRN,str[2],sizeof(t->card1->MODTRN));
           break;
         case I_CARD1_SPEED:
@@ -352,7 +352,7 @@ int CARD1_gets(char *line,TAPE5_struct *t)
     case MOD_V5:
       switch(n)
       {
-        case I_CARD1_MODTRAN:
+        case I_CARD1_MODTRN:
           strncpy(t->card1->MODTRN,str[2],sizeof(t->card1->MODTRN));
           break;
         case I_CARD1_SPEED:
@@ -451,7 +451,7 @@ int CARD1_check(const CARD1_struct *c,int n)
   rt = 0;
   switch(n)
   {
-    case I_CARD1_MODTRAN:
+    case I_CARD1_MODTRN:
       if(strpbrk(c->MODTRN,"TM CKFL") == NULL)
       {
         fprintf(stderr,"CARD1: error in %s, %s\n",CARD1_name[n],c->MODTRN);
@@ -621,7 +621,7 @@ char *CARD1_to_s(const CARD1_struct *c,int n,char *s)
 {
   switch(n)
   {
-    case I_CARD1_MODTRAN:
+    case I_CARD1_MODTRN:
       sprintf(s,"%s",c->MODTRN);
       break;
     case I_CARD1_SPEED:

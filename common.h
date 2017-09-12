@@ -28,7 +28,7 @@
 #define	CARD2C2_WMOL_NINDX		9
 #define	CARD2C2X_WMOLX_NINDX		13
 #define	CARD1_NPAR			20
-#define	I_CARD1_MODTRAN			0
+#define	I_CARD1_MODTRN			0
 #define	I_CARD1_SPEED			1
 #define	I_CARD1_BINARY			2
 #define	I_CARD1_LYMOLC			3
@@ -48,7 +48,30 @@
 #define	I_CARD1_NOPRNT			17
 #define	I_CARD1_TPTEMP			18
 #define	I_CARD1_SURREF			19
-#define	CARD1A_NPAR			13
+#define	CARD1A_NPAR			23
+#define	I_CARD1A_DIS			0
+#define	I_CARD1A_DISAZM			1
+#define	I_CARD1A_DISALB			2
+#define	I_CARD1A_NSTR   		3
+#define	I_CARD1A_LSUN			4
+#define	I_CARD1A_ISUN			5
+#define	I_CARD1A_SFWHM			6
+#define	I_CARD1A_CO2MX			7
+#define	I_CARD1A_H2OSTR			8
+#define	I_CARD1A_O3STR			9
+#define	I_CARD1A_C_PROF			10
+#define	I_CARD1A_LSUNFL			11
+#define	I_CARD1A_LBMNAM			12
+#define	I_CARD1A_LFLTNM			13
+#define	I_CARD1A_H2OAER			14
+#define	I_CARD1A_CDTDIR			15
+#define	I_CARD1A_SOLCON			16
+#define	I_CARD1A_CDASTM			17
+#define	I_CARD1A_ASTMC			18
+#define	I_CARD1A_ASTMX			19
+#define	I_CARD1A_ASTMO			20
+#define	I_CARD1A_AERRH			21
+#define	I_CARD1A_NSSALB			22
 #define	CARD1A1_NPAR			1
 #define	CARD1A2_NPAR			1
 #define	CARD1A3_NPAR			1
@@ -116,17 +139,27 @@ typedef struct
 {
   char		DIS[2];
   char		DISAZM[2];
+  char		DISALB[2];
   int		NSTR;
   char		LSUN[2];
   int		ISUN;
+  double	SFWHM;
   double	CO2MX;
   char		H2OSTR[16];
   char		O3STR[16];
+  int		C_PROF;
   char		LSUNFL[2];
   char		LBMNAM[2];
   char		LFLTNM[2];
   char		H2OAER[2];
+  char		CDTDIR[2];
   double	SOLCON;
+  char		CDASTM[2];
+  double	ASTMC;
+  double	ASTMX;
+  double	ASTMO;
+  double	AERRH;
+  int		NSSALB;
 } CARD1A_struct;
 
 typedef struct

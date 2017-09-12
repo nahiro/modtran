@@ -7,52 +7,81 @@ char	CARD1A_name[CARD1A_NPAR][10]	=
 {
   "DIS",
   "DISAZM",
-  //"DISALB",
+  "DISALB",
   "NSTR",
   "LSUN",
   "ISUN",
+  "SFWHM",
   "CO2MX",
   "H2OSTR",
   "O3STR",
+  "C_PROF",
   "LSUNFL",
   "LBMNAM",
   "LFLTNM",
   "H2OAER",
+  "CDTDIR",
   "SOLCON",
+  "CDASTM",
+  "ASTMC",
+  "ASTMX",
+  "ASTMO",
+  "AERRH",
+  "NSSALB",
 };
 
 CARD1A_struct CARD1A_default		=
 {
   "T",
   "T",
+  "F",
   16,
   "F",
+  0,
   0.0,
   365.0,
   "0",
   "0",
+  0,
   "F",
   "F",
   "F",
   "T",
+  "F",
   1.0,
+  "T",
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0,
 };
 
 char CARD1A_description[CARD1A_NPAR][MAXLINE] =
 {
   "DISORT multiple scattering algorighm",
   "azimuth dependence flag",
+  "spherical albedo flag"
   "number of streams",
   "solar irradiance from a file",
+  "FWHM of the triangular scanning function",
   "FWHM of the triangular scanning function",
   "CO2 mixing ratio (ppmv)",
   "vertical water vapor column (g/cm2)",
   "vertical ozone column (g/cm2)",
+  "scale default profiles",
   "solar irradiance file name from CARD 1A1",
   "band model file name from CARD 1A2",
   "instrument filter file name from CARD 1A3",
-  "",
+  "reflect the changes of RH profile",
+  "directory name from CARD 1A4"
   "scaling of the solar irradiance",
+  "perturb both the BL/tropospheric aerosol",
+  "Angstrom coefficient",
+  "Angstrom offset, used with perturbation",
+  "Angstrom offset, not used with perturbation",
+  "relative humidity",
+  "number of SSA spectral grid points",
 };
 
 void CARD1A_write(const TAPE5_struct *t,FILE *fp)
@@ -98,34 +127,34 @@ int CARD1A_read(TAPE5_struct *t,FILE *fp)
   // read values
   #ifdef OLDMODE
   n = 0;
-  if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt =  1; n += 1;
-  if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt =  2; n += 1;
-  if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt =  3; n += 3;
-  if(get_upp(line,n,1,t->card1a->LSUN)     < 0) rt =  4; n += 1;
-  if(get_int(line,n,4,&t->card1a->ISUN)    < 0) rt =  5; n += 4;
-  if(get_dbl(line,n,10,&t->card1a->CO2MX)  < 0) rt =  6; n += 10;
-  if(get_upp(line,n,10,t->card1a->H2OSTR)  < 0) rt =  7; n += 10;
-  if(get_upp(line,n,10,t->card1a->O3STR)   < 0) rt =  8; n += 11;
-  if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt =  9; n += 2;
-  if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = 10; n += 2;
-  if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = 11; n += 2;
-  if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = 12; n += 3;
-  if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = 13;
+  if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt = I_CARD1A_DIS;    n += 1;
+  if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt = I_CARD1A_DISAZM; n += 1;
+  if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt = I_CARD1A_NSTR;   n += 3;
+  if(get_upp(line,n,1,t->card1a->LSUN)     < 0) rt = I_CARD1A_LSUN;   n += 1;
+  if(get_int(line,n,4,&t->card1a->ISUN)    < 0) rt = I_CARD1A_ISUN;   n += 4;
+  if(get_dbl(line,n,10,&t->card1a->CO2MX)  < 0) rt = I_CARD1A_CO2MX;  n += 10;
+  if(get_upp(line,n,10,t->card1a->H2OSTR)  < 0) rt = I_CARD1A_H2OSTR; n += 10;
+  if(get_upp(line,n,10,t->card1a->O3STR)   < 0) rt = I_CARD1A_O3STR;  n += 11;
+  if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt = I_CARD1A_LSUNFL; n += 2;
+  if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = I_CARD1A_LBMNAM; n += 2;
+  if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = I_CARD1A_LFLTNM; n += 2;
+  if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = I_CARD1A_H2OAER; n += 3;
+  if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = I_CARD1A_SOLCON;
   #else
   n = 0;
-  if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt =  1; n += 1;
-  if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt =  2; n += 1;
-  if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt =  3; n += 3;
-  if(get_upp(line,n,1,t->card1a->LSUN)     < 0) rt =  4; n += 1;
-  if(get_int(line,n,4,&t->card1a->ISUN)    < 0) rt =  5; n += 4;
-  if(get_dbl(line,n,15,&t->card1a->CO2MX)  < 0) rt =  6; n += 15;
-  if(get_upp(line,n,15,t->card1a->H2OSTR)  < 0) rt =  7; n += 15;
-  if(get_upp(line,n,15,t->card1a->O3STR)   < 0) rt =  8; n += 16;
-  if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt =  9; n += 2;
-  if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = 10; n += 2;
-  if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = 11; n += 2;
-  if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = 12; n += 3;
-  if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = 13;
+  if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt = I_CARD1A_DIS;    n += 1;
+  if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt = I_CARD1A_DISAZM; n += 1;
+  if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt = I_CARD1A_NSTR;   n += 3;
+  if(get_upp(line,n,1,t->card1a->LSUN)     < 0) rt = I_CARD1A_LSUN;   n += 1;
+  if(get_int(line,n,4,&t->card1a->ISUN)    < 0) rt = I_CARD1A_ISUN;   n += 4;
+  if(get_dbl(line,n,15,&t->card1a->CO2MX)  < 0) rt = I_CARD1A_CO2MX;  n += 15;
+  if(get_upp(line,n,15,t->card1a->H2OSTR)  < 0) rt = I_CARD1A_H2OSTR; n += 15;
+  if(get_upp(line,n,15,t->card1a->O3STR)   < 0) rt = I_CARD1A_O3STR;  n += 16;
+  if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt = I_CARD1A_LSUNFL; n += 2;
+  if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = I_CARD1A_LBMNAM; n += 2;
+  if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = I_CARD1A_LFLTNM; n += 2;
+  if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = I_CARD1A_H2OAER; n += 3;
+  if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = I_CARD1A_SOLCON;
   #endif
   if(rt)
   {
@@ -189,8 +218,8 @@ int CARD1A_gets(char *line,TAPE5_struct *t)
   // convert value if required
   switch(n)
   {
-    case 2:
-    case 4:
+    case I_CARD1A_NSTR:
+    case I_CARD1A_ISUN:
       errno = 0;
       ntmp = strtol(str[2],&p,10);
       if(errno==ERANGE || *p!='\0')
@@ -199,8 +228,8 @@ int CARD1A_gets(char *line,TAPE5_struct *t)
         return -1;
       }
       break;
-    case 5:
-    case 12:
+    case I_CARD1A_CO2MX:
+    case I_CARD1A_SOLCON:
       errno = 0;
       xtmp = strtod(str[2],&p);
       if(errno==ERANGE || *p!='\0')
@@ -214,43 +243,43 @@ int CARD1A_gets(char *line,TAPE5_struct *t)
   // set value
   switch(n)
   {
-    case 0:
+    case I_CARD1A_DIS:
       strncpy(t->card1a->DIS,str[2],sizeof(t->card1a->DIS));
       break;
-    case 1:
+    case I_CARD1A_DISAZM:
       strncpy(t->card1a->DISAZM,str[2],sizeof(t->card1a->DISAZM));
       break;
-    case 2:
+    case I_CARD1A_NSTR:
       t->card1a->NSTR = ntmp;
       break;
-    case 3:
+    case I_CARD1A_LSUN:
       strncpy(t->card1a->LSUN,str[2],sizeof(t->card1a->LSUN));
       break;
-    case 4:
+    case I_CARD1A_ISUN:
       t->card1a->ISUN = ntmp;
       break;
-    case 5:
+    case I_CARD1A_CO2MX:
       t->card1a->CO2MX = xtmp;
       break;
-    case 6:
+    case I_CARD1A_H2OSTR:
       strncpy(t->card1a->H2OSTR,str[2],sizeof(t->card1a->H2OSTR));
       break;
-    case 7:
+    case I_CARD1A_O3STR:
       strncpy(t->card1a->O3STR,str[2],sizeof(t->card1a->O3STR));
       break;
-    case 8:
+    case I_CARD1A_LSUNFL:
       strncpy(t->card1a->LSUNFL,str[2],sizeof(t->card1a->LSUNFL));
       break;
-    case 9:
+    case I_CARD1A_LBMNAM:
       strncpy(t->card1a->LBMNAM,str[2],sizeof(t->card1a->LBMNAM));
       break;
-    case 10:
+    case I_CARD1A_LFLTNM:
       strncpy(t->card1a->LFLTNM,str[2],sizeof(t->card1a->LFLTNM));
       break;
-    case 11:
+    case I_CARD1A_H2OAER:
       strncpy(t->card1a->H2OAER,str[2],sizeof(t->card1a->H2OAER));
       break;
-    case 12:
+    case I_CARD1A_SOLCON:
       t->card1a->SOLCON = xtmp;
       break;
     default:
@@ -313,86 +342,86 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
   switch(n)
   {
     #ifdef OLDMODE
-    case 0:
+    case I_CARD1A_DIS:
       sprintf(s,"%s",c->DIS);
       break;
-    case 1:
+    case I_CARD1A_DISAZM:
       sprintf(s,"%s",c->DISAZM);
       break;
-    case 2:
+    case I_CARD1A_NSTR:
       sprintf(s,"%d",c->NSTR);
       break;
-    case 3:
+    case I_CARD1A_LSUN:
       sprintf(s,"%s",c->LSUN);
       break;
-    case 4:
+    case I_CARD1A_ISUN:
       sprintf(s,"%d",c->ISUN);
       break;
-    case 5:
+    case I_CARD1A_CO2MX:
       sprintf(s,"%.5f",c->CO2MX);
       break;
-    case 6:
+    case I_CARD1A_H2OSTR:
       sprintf(s,"%s",c->H2OSTR);
       break;
-    case 7:
+    case I_CARD1A_O3STR:
       sprintf(s,"%s",c->O3STR);
       break;
-    case 8:
+    case I_CARD1A_LSUNFL:
       sprintf(s,"%s",c->LSUNFL);
       break;
-    case 9:
+    case I_CARD1A_LBMNAM:
       sprintf(s,"%s",c->LBMNAM);
       break;
-    case 10:
+    case I_CARD1A_LFLTNM:
       sprintf(s,"%s",c->LFLTNM);
       break;
-    case 11:
+    case I_CARD1A_H2OAER:
       sprintf(s,"%s",c->H2OAER);
       break;
-    case 12:
+    case I_CARD1A_SOLCON:
       sprintf(s,"%.3f",c->SOLCON);
       break;
     default:
       sprintf(s,"?");
       break;
     #else
-    case 0:
+    case I_CARD1A_DIS:
       sprintf(s,"%s",c->DIS);
       break;
-    case 1:
+    case I_CARD1A_DISAZM:
       sprintf(s,"%s",c->DISAZM);
       break;
-    case 2:
+    case I_CARD1A_NSTR:
       sprintf(s,"%d",c->NSTR);
       break;
-    case 3:
+    case I_CARD1A_LSUN:
       sprintf(s,"%s",c->LSUN);
       break;
-    case 4:
+    case I_CARD1A_ISUN:
       sprintf(s,"%d",c->ISUN);
       break;
-    case 5:
+    case I_CARD1A_CO2MX:
       sprintf(s,"%.8f",c->CO2MX);
       break;
-    case 6:
+    case I_CARD1A_H2OSTR:
       sprintf(s,"%s",c->H2OSTR);
       break;
-    case 7:
+    case I_CARD1A_O3STR:
       sprintf(s,"%s",c->O3STR);
       break;
-    case 8:
+    case I_CARD1A_LSUNFL:
       sprintf(s,"%s",c->LSUNFL);
       break;
-    case 9:
+    case I_CARD1A_LBMNAM:
       sprintf(s,"%s",c->LBMNAM);
       break;
-    case 10:
+    case I_CARD1A_LFLTNM:
       sprintf(s,"%s",c->LFLTNM);
       break;
-    case 11:
+    case I_CARD1A_H2OAER:
       sprintf(s,"%s",c->H2OAER);
       break;
-    case 12:
+    case I_CARD1A_SOLCON:
       sprintf(s,"%.3f",c->SOLCON);
       break;
     default:
