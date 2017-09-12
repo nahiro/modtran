@@ -180,37 +180,91 @@ int CARD1A_read(TAPE5_struct *t,FILE *fp)
   rt = 0;
 
   // read values
-  #ifdef OLDMODE
-  n = 0;
-  if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt = I_CARD1A_DIS;    n += 1;
-  if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt = I_CARD1A_DISAZM; n += 1;
-  if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt = I_CARD1A_NSTR;   n += 3;
-  if(get_upp(line,n,1,t->card1a->LSUN)     < 0) rt = I_CARD1A_LSUN;   n += 1;
-  if(get_int(line,n,4,&t->card1a->ISUN)    < 0) rt = I_CARD1A_ISUN;   n += 4;
-  if(get_dbl(line,n,10,&t->card1a->CO2MX)  < 0) rt = I_CARD1A_CO2MX;  n += 10;
-  if(get_upp(line,n,10,t->card1a->H2OSTR)  < 0) rt = I_CARD1A_H2OSTR; n += 10;
-  if(get_upp(line,n,10,t->card1a->O3STR)   < 0) rt = I_CARD1A_O3STR;  n += 11;
-  if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt = I_CARD1A_LSUNFL; n += 2;
-  if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = I_CARD1A_LBMNAM; n += 2;
-  if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = I_CARD1A_LFLTNM; n += 2;
-  if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = I_CARD1A_H2OAER; n += 3;
-  if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = I_CARD1A_SOLCON;
-  #else
-  n = 0;
-  if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt = I_CARD1A_DIS;    n += 1;
-  if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt = I_CARD1A_DISAZM; n += 1;
-  if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt = I_CARD1A_NSTR;   n += 3;
-  if(get_upp(line,n,1,t->card1a->LSUN)     < 0) rt = I_CARD1A_LSUN;   n += 1;
-  if(get_int(line,n,4,&t->card1a->ISUN)    < 0) rt = I_CARD1A_ISUN;   n += 4;
-  if(get_dbl(line,n,15,&t->card1a->CO2MX)  < 0) rt = I_CARD1A_CO2MX;  n += 15;
-  if(get_upp(line,n,15,t->card1a->H2OSTR)  < 0) rt = I_CARD1A_H2OSTR; n += 15;
-  if(get_upp(line,n,15,t->card1a->O3STR)   < 0) rt = I_CARD1A_O3STR;  n += 16;
-  if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt = I_CARD1A_LSUNFL; n += 2;
-  if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = I_CARD1A_LBMNAM; n += 2;
-  if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = I_CARD1A_LFLTNM; n += 2;
-  if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = I_CARD1A_H2OAER; n += 3;
-  if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = I_CARD1A_SOLCON;
-  #endif
+  switch(mod_v)
+  {
+    case MOD_V4:
+      #ifdef OLDMODE
+      n = 0;
+      if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt = I_CARD1A_DIS;    n += 1;
+      if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt = I_CARD1A_DISAZM; n += 1;
+      if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt = I_CARD1A_NSTR;   n += 3;
+      if(get_upp(line,n,1,t->card1a->LSUN)     < 0) rt = I_CARD1A_LSUN;   n += 1;
+      if(get_int(line,n,4,&t->card1a->ISUN)    < 0) rt = I_CARD1A_ISUN;   n += 4;
+      if(get_dbl(line,n,10,&t->card1a->CO2MX)  < 0) rt = I_CARD1A_CO2MX;  n += 10;
+      if(get_upp(line,n,10,t->card1a->H2OSTR)  < 0) rt = I_CARD1A_H2OSTR; n += 10;
+      if(get_upp(line,n,10,t->card1a->O3STR)   < 0) rt = I_CARD1A_O3STR;  n += 11;
+      if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt = I_CARD1A_LSUNFL; n += 2;
+      if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = I_CARD1A_LBMNAM; n += 2;
+      if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = I_CARD1A_LFLTNM; n += 2;
+      if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = I_CARD1A_H2OAER; n += 3;
+      if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = I_CARD1A_SOLCON;
+      #else
+      n = 0;
+      if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt = I_CARD1A_DIS;    n += 1;
+      if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt = I_CARD1A_DISAZM; n += 1;
+      if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt = I_CARD1A_NSTR;   n += 3;
+      if(get_upp(line,n,1,t->card1a->LSUN)     < 0) rt = I_CARD1A_LSUN;   n += 1;
+      if(get_int(line,n,4,&t->card1a->ISUN)    < 0) rt = I_CARD1A_ISUN;   n += 4;
+      if(get_dbl(line,n,15,&t->card1a->CO2MX)  < 0) rt = I_CARD1A_CO2MX;  n += 15;
+      if(get_upp(line,n,15,t->card1a->H2OSTR)  < 0) rt = I_CARD1A_H2OSTR; n += 15;
+      if(get_upp(line,n,15,t->card1a->O3STR)   < 0) rt = I_CARD1A_O3STR;  n += 16;
+      if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt = I_CARD1A_LSUNFL; n += 2;
+      if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = I_CARD1A_LBMNAM; n += 2;
+      if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = I_CARD1A_LFLTNM; n += 2;
+      if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = I_CARD1A_H2OAER; n += 3;
+      if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = I_CARD1A_SOLCON;
+      #endif
+      break;
+    case MOD_V5:
+      #ifdef OLDMODE
+      n = 0;
+      if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt = I_CARD1A_DIS;    n += 1;
+      if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt = I_CARD1A_DISAZM; n += 1;
+      if(get_upp(line,n,1,t->card1a->DISALB)   < 0) rt = I_CARD1A_DISALB; n += 1;
+      if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt = I_CARD1A_NSTR;   n += 3;
+      if(get_dbl(line,n,4,&t->card1a->SFWHM)   < 0) rt = I_CARD1A_SFWHM;  n += 4;
+      if(get_dbl(line,n,10,&t->card1a->CO2MX)  < 0) rt = I_CARD1A_CO2MX;  n += 10;
+      if(get_upp(line,n,10,t->card1a->H2OSTR)  < 0) rt = I_CARD1A_H2OSTR; n += 10;
+      if(get_upp(line,n,10,t->card1a->O3STR)   < 0) rt = I_CARD1A_O3STR;  n += 10;
+      if(get_int(line,n,1,&t->card1a->C_PROF)  < 0) rt = I_CARD1A_C_PROF; n += 1;
+      if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt = I_CARD1A_LSUNFL; n += 2;
+      if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = I_CARD1A_LBMNAM; n += 2;
+      if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = I_CARD1A_LFLTNM; n += 2;
+      if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = I_CARD1A_H2OAER; n += 2;
+      if(get_upp(line,n,1,t->card1a->CDTDIR)   < 0) rt = I_CARD1A_CDTDIR; n += 1;
+      if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = I_CARD1A_SOLCON; n += 10;
+      if(get_upp(line,n,1,t->card1a->CDASTM)   < 0) rt = I_CARD1A_CDASTM; n += 1;
+      if(get_dbl(line,n,9,&t->card1a->ASTMC)   < 0) rt = I_CARD1A_ASTMC;  n += 9;
+      if(get_dbl(line,n,10,&t->card1a->ASTMX)  < 0) rt = I_CARD1A_ASTMX;  n += 10;
+      if(get_dbl(line,n,10,&t->card1a->ASTMO)  < 0) rt = I_CARD1A_ASTMO;  n += 10;
+      if(get_dbl(line,n,10,&t->card1a->AERRH)  < 0) rt = I_CARD1A_AERRH;  n += 10;
+      if(get_int(line,n,10,&t->card1a->NSSALB) < 0) rt = I_CARD1A_NSSALB;
+      #else
+      n = 0;
+      if(get_upp(line,n,1,t->card1a->DIS)      < 0) rt = I_CARD1A_DIS;    n += 1;
+      if(get_upp(line,n,1,t->card1a->DISAZM)   < 0) rt = I_CARD1A_DISAZM; n += 1;
+      if(get_upp(line,n,1,t->card1a->DISALB)   < 0) rt = I_CARD1A_DISALB; n += 1;
+      if(get_int(line,n,3,&t->card1a->NSTR)    < 0) rt = I_CARD1A_NSTR;   n += 3;
+      if(get_dbl(line,n,4,&t->card1a->SFWHM)   < 0) rt = I_CARD1A_SFWHM;  n += 4;
+      if(get_dbl(line,n,15,&t->card1a->CO2MX)  < 0) rt = I_CARD1A_CO2MX;  n += 15;
+      if(get_upp(line,n,15,t->card1a->H2OSTR)  < 0) rt = I_CARD1A_H2OSTR; n += 15;
+      if(get_upp(line,n,15,t->card1a->O3STR)   < 0) rt = I_CARD1A_O3STR;  n += 15;
+      if(get_int(line,n,1,&t->card1a->C_PROF)  < 0) rt = I_CARD1A_C_PROF; n += 1;
+      if(get_upp(line,n,1,t->card1a->LSUNFL)   < 0) rt = I_CARD1A_LSUNFL; n += 2;
+      if(get_upp(line,n,1,t->card1a->LBMNAM)   < 0) rt = I_CARD1A_LBMNAM; n += 2;
+      if(get_upp(line,n,1,t->card1a->LFLTNM)   < 0) rt = I_CARD1A_LFLTNM; n += 2;
+      if(get_upp(line,n,1,t->card1a->H2OAER)   < 0) rt = I_CARD1A_H2OAER; n += 2;
+      if(get_upp(line,n,1,t->card1a->CDTDIR)   < 0) rt = I_CARD1A_CDTDIR; n += 1;
+      if(get_dbl(line,n,10,&t->card1a->SOLCON) < 0) rt = I_CARD1A_SOLCON; n += 10;
+      if(get_upp(line,n,1,t->card1a->CDASTM)   < 0) rt = I_CARD1A_CDASTM; n += 1;
+      if(get_dbl(line,n,9,&t->card1a->ASTMC)   < 0) rt = I_CARD1A_ASTMC;  n += 9;
+      if(get_dbl(line,n,10,&t->card1a->ASTMX)  < 0) rt = I_CARD1A_ASTMX;  n += 10;
+      if(get_dbl(line,n,10,&t->card1a->ASTMO)  < 0) rt = I_CARD1A_ASTMO;  n += 10;
+      if(get_dbl(line,n,10,&t->card1a->AERRH)  < 0) rt = I_CARD1A_AERRH;  n += 10;
+      if(get_int(line,n,10,&t->card1a->NSSALB) < 0) rt = I_CARD1A_NSSALB;
+      #endif
+      break;
+  }
   if(rt)
   {
     fprintf(stderr,"CARD1A_read: rt=%d\n",rt);
