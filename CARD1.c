@@ -596,7 +596,8 @@ int CARD1_check(const CARD1_struct *c,int n)
         }
         if(v < 0.0)
         {
-          if(fabs(v-(double)((int)(v+0.5))) > 1.0e-13)
+          v *= -1.0;
+          if(fabs(v-(double)((int)(v+0.5))) > 1.0e-10)
           {
             fprintf(stderr,"CARD1: error in %s, %s\n",CARD1_name[n],c->SURREF);
             rt = -1;
