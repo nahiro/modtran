@@ -7,6 +7,7 @@ char	CARD1A_name[CARD1A_NPAR][10]	=
 {
   "DIS",
   "DISAZM",
+  //"DISALB",
   "NSTR",
   "LSUN",
   "ISUN",

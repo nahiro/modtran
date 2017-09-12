@@ -107,9 +107,9 @@ void CARD1_print(const TAPE5_struct *t,FILE *fp)
       {
         switch(n)
         {
-          case 2:
-          case 3:
-          case 16:
+          case I_CARD1_BINARY:
+          case I_CARD1_LYMOLC:
+          case I_CARD1_I_RD2C:
             break;
           default:
             fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD1_ID,CARD1_name[n],CARD1_to_s(t->card1,n,s),CARD1_description[n]);
@@ -122,7 +122,7 @@ void CARD1_print(const TAPE5_struct *t,FILE *fp)
       {
         switch(n)
         {
-          case 15:
+          case I_CARD1_IM:
             break;
           default:
             fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD1_ID,CARD1_name[n],CARD1_to_s(t->card1,n,s),CARD1_description[n]);
@@ -254,19 +254,20 @@ int CARD1_gets(char *line,TAPE5_struct *t)
   // convert value if required
   switch(n)
   {
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-    case 14:
+    case I_CARD1_MODEL:
+    case I_CARD1_ITYPE:
+    case I_CARD1_IEMSCT:
+    case I_CARD1_IMULT:
+    case I_CARD1_M1:
+    case I_CARD1_M2:
+    case I_CARD1_M3:
+    case I_CARD1_M4:
+    case I_CARD1_M5:
+    case I_CARD1_M6:
+    case I_CARD1_MDEF:
+    case I_CARD1_IM:
+    case I_CARD1_I_RD2C:
+    case I_CARD1_NOPRNT:
       errno = 0;
       ntmp = strtol(str[2],&p,10);
       if(errno==ERANGE || *p!='\0')
@@ -275,7 +276,7 @@ int CARD1_gets(char *line,TAPE5_struct *t)
         return -1;
       }
       break;
-    case 15:
+    case I_CARD1_TPTEMP:
       errno = 0;
       xtmp = strtod(str[2],&p);
       if(errno==ERANGE || *p!='\0')
@@ -287,61 +288,131 @@ int CARD1_gets(char *line,TAPE5_struct *t)
   }
 
   // set value
-  switch(n)
+  switch(mod_v)
   {
-    case 0:
-      strncpy(t->card1->MODTRN,str[2],sizeof(t->card1->MODTRN));
+    case MOD_V4:
+      switch(n)
+      {
+        case I_CARD1_MODTRAN:
+          strncpy(t->card1->MODTRN,str[2],sizeof(t->card1->MODTRN));
+          break;
+        case I_CARD1_SPEED:
+          strncpy(t->card1->SPEED,str[2],sizeof(t->card1->SPEED));
+          break;
+        case I_CARD1_MODEL:
+          t->card1->MODEL = ntmp;
+          break;
+        case I_CARD1_ITYPE:
+          t->card1->ITYPE = ntmp;
+          break;
+        case I_CARD1_IEMSCT:
+          t->card1->IEMSCT = ntmp;
+          break;
+        case I_CARD1_IMULT:
+          t->card1->IMULT = ntmp;
+          break;
+        case I_CARD1_M1:
+          t->card1->M1 = ntmp;
+          break;
+        case I_CARD1_M2:
+          t->card1->M2 = ntmp;
+          break;
+        case I_CARD1_M3:
+          t->card1->M3 = ntmp;
+          break;
+        case I_CARD1_M4:
+          t->card1->M4 = ntmp;
+          break;
+        case I_CARD1_M5:
+          t->card1->M5 = ntmp;
+          break;
+        case I_CARD1_M6:
+          t->card1->M6 = ntmp;
+          break;
+        case I_CARD1_MDEF:
+          t->card1->MDEF = ntmp;
+          break;
+        case I_CARD1_IM:
+          t->card1->IM = ntmp;
+          break;
+        case I_CARD1_NOPRNT:
+          t->card1->NOPRNT = ntmp;
+          break;
+        case I_CARD1_TPTEMP:
+          t->card1->TPTEMP = xtmp;
+          break;
+        case I_CARD1_SURREF:
+          strncpy(t->card1->SURREF,str[2],CARD_LENGTH);
+          break;
+        default:
+          return -1;
+          break;
+      }
       break;
-    case 1:
-      strncpy(t->card1->SPEED,str[2],sizeof(t->card1->SPEED));
-      break;
-    case 2:
-      t->card1->MODEL = ntmp;
-      break;
-    case 3:
-      t->card1->ITYPE = ntmp;
-      break;
-    case 4:
-      t->card1->IEMSCT = ntmp;
-      break;
-    case 5:
-      t->card1->IMULT = ntmp;
-      break;
-    case 6:
-      t->card1->M1 = ntmp;
-      break;
-    case 7:
-      t->card1->M2 = ntmp;
-      break;
-    case 8:
-      t->card1->M3 = ntmp;
-      break;
-    case 9:
-      t->card1->M4 = ntmp;
-      break;
-    case 10:
-      t->card1->M5 = ntmp;
-      break;
-    case 11:
-      t->card1->M6 = ntmp;
-      break;
-    case 12:
-      t->card1->MDEF = ntmp;
-      break;
-    case 13:
-      t->card1->IM = ntmp;
-      break;
-    case 14:
-      t->card1->NOPRNT = ntmp;
-      break;
-    case 15:
-      t->card1->TPTEMP = xtmp;
-      break;
-    case 16:
-      strncpy(t->card1->SURREF,str[2],CARD_LENGTH);
-      break;
-    default:
-      return -1;
+    case MOD_V5:
+      switch(n)
+      {
+        case I_CARD1_MODTRAN:
+          strncpy(t->card1->MODTRN,str[2],sizeof(t->card1->MODTRN));
+          break;
+        case I_CARD1_SPEED:
+          strncpy(t->card1->SPEED,str[2],sizeof(t->card1->SPEED));
+          break;
+        case I_CARD1_BINARY:
+          strncpy(t->card1->BINARY,str[2],sizeof(t->card1->BINARY));
+          break;
+        case I_CARD1_LYMOLC:
+          strncpy(t->card1->LYMOLC,str[2],sizeof(t->card1->LYMOLC));
+          break;
+        case I_CARD1_MODEL:
+          t->card1->MODEL = ntmp;
+          break;
+        case I_CARD1_ITYPE:
+          t->card1->ITYPE = ntmp;
+          break;
+        case I_CARD1_IEMSCT:
+          t->card1->IEMSCT = ntmp;
+          break;
+        case I_CARD1_IMULT:
+          t->card1->IMULT = ntmp;
+          break;
+        case I_CARD1_M1:
+          t->card1->M1 = ntmp;
+          break;
+        case I_CARD1_M2:
+          t->card1->M2 = ntmp;
+          break;
+        case I_CARD1_M3:
+          t->card1->M3 = ntmp;
+          break;
+        case I_CARD1_M4:
+          t->card1->M4 = ntmp;
+          break;
+        case I_CARD1_M5:
+          t->card1->M5 = ntmp;
+          break;
+        case I_CARD1_M6:
+          t->card1->M6 = ntmp;
+          break;
+        case I_CARD1_MDEF:
+          t->card1->MDEF = ntmp;
+          break;
+        case I_CARD1_I_RD2C:
+          t->card1->I_RD2C = ntmp;
+          break;
+        case I_CARD1_NOPRNT:
+          t->card1->NOPRNT = ntmp;
+          break;
+        case I_CARD1_TPTEMP:
+          t->card1->TPTEMP = xtmp;
+          break;
+        case I_CARD1_SURREF:
+          strncpy(t->card1->SURREF,str[2],CARD_LENGTH);
+          break;
+        default:
+          return -1;
+          break;
+      }
       break;
   }
 
@@ -380,119 +451,140 @@ int CARD1_check(const CARD1_struct *c,int n)
   rt = 0;
   switch(n)
   {
-    case 0:
+    case I_CARD1_MODTRAN:
       if(strpbrk(c->MODTRN,"TM CKFL") == NULL)
       {
         fprintf(stderr,"CARD1: error in %s, %s\n",CARD1_name[n],c->MODTRN);
         rt = -1;
       }
       break;
-    case 1:
+    case I_CARD1_SPEED:
       if(strpbrk(c->SPEED,"S M") == NULL)
       {
         fprintf(stderr,"CARD1: error in %s, %s\n",CARD1_name[n],c->SPEED);
         rt = -1;
       }
       break;
-    case 2:
+    case I_CARD1_BINARY:
+      if(strpbrk(c->BINARY,"F T") == NULL)
+      {
+        fprintf(stderr,"CARD1: error in %s, %s\n",CARD1_name[n],c->BINARY);
+        rt = -1;
+      }
+      break;
+    case I_CARD1_LYMOLC:
+      if(strpbrk(c->LYMOLC,"+ ") == NULL)
+      {
+        fprintf(stderr,"CARD1: error in %s, %s\n",CARD1_name[n],c->LYMOLC);
+        rt = -1;
+      }
+      break;
+    case I_CARD1_MODEL:
       if(c->MODEL<0 || c->MODEL>8)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->MODEL);
         rt = -1;
       }
       break;
-    case 3:
+    case I_CARD1_ITYPE:
       if(c->ITYPE<1 || c->ITYPE>3)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->ITYPE);
         rt = -1;
       }
       break;
-    case 4:
+    case I_CARD1_IEMSCT:
       if(c->IEMSCT<0 || c->IEMSCT>3)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->IEMSCT);
         rt = -1;
       }
       break;
-    case 5:
+    case I_CARD1_IMULT:
       if(c->IMULT<-1 || c->IMULT>1)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->IMULT);
         rt = -1;
       }
       break;
-    case 6:
+    case I_CARD1_M1:
       if(c->M1<0 || c->M1>6)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->M1);
         rt = -1;
       }
       break;
-    case 7:
+    case I_CARD1_M2:
       if(c->M2<0 || c->M2>6)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->M2);
         rt = -1;
       }
       break;
-    case 8:
+    case I_CARD1_M3:
       if(c->M3<0 || c->M3>6)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->M3);
         rt = -1;
       }
       break;
-    case 9:
+    case I_CARD1_M4:
       if(c->M4<0 || c->M4>6)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->M4);
         rt = -1;
       }
       break;
-    case 10:
+    case I_CARD1_M5:
       if(c->M5<0 || c->M5>6)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->M5);
         rt = -1;
       }
       break;
-    case 11:
+    case I_CARD1_M6:
       if(c->M6<0 || c->M6>6)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->M6);
         rt = -1;
       }
       break;
-    case 12:
+    case I_CARD1_MDEF:
       if(c->MDEF<0 || c->MDEF>2)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->MDEF);
         rt = -1;
       }
       break;
-    case 13:
+    case I_CARD1_IM:
       if(c->IM<0 || c->IM>1)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->IM);
         rt = -1;
       }
       break;
-    case 14:
+    case I_CARD1_I_RD2C:
+      if(c->I_RD2C<0 || c->I_RD2C>1)
+      {
+        fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->I_RD2C);
+        rt = -1;
+      }
+      break;
+    case I_CARD1_NOPRNT:
       if(c->NOPRNT<-2 || c->NOPRNT>1)
       {
         fprintf(stderr,"CARD1: error in %s, %d\n",CARD1_name[n],c->NOPRNT);
         rt = -1;
       }
       break;
-    case 15:
+    case I_CARD1_TPTEMP:
       if(c->TPTEMP == NAN)
       {
         fprintf(stderr,"CARD1: error in %s, %13.4e\n",CARD1_name[n],c->TPTEMP);
         rt = -1;
       }
       break;
-    case 16:
+    case I_CARD1_SURREF:
       if(strncasecmp(c->SURREF,"BRDF",1)!=0 && strncasecmp(c->SURREF,"LAMBER",1)!=0)
       {
         errno = 0;
@@ -529,55 +621,64 @@ char *CARD1_to_s(const CARD1_struct *c,int n,char *s)
 {
   switch(n)
   {
-    case 0:
+    case I_CARD1_MODTRAN:
       sprintf(s,"%s",c->MODTRN);
       break;
-    case 1:
+    case I_CARD1_SPEED:
       sprintf(s,"%s",c->SPEED);
       break;
-    case 2:
+    case I_CARD1_BINARY:
+      sprintf(s,"%s",c->BINARY);
+      break;
+    case I_CARD1_LYMOLC:
+      sprintf(s,"%s",c->LYMOLC);
+      break;
+    case I_CARD1_MODEL:
       sprintf(s,"%d",c->MODEL);
       break;
-    case 3:
+    case I_CARD1_ITYPE:
       sprintf(s,"%d",c->ITYPE);
       break;
-    case 4:
+    case I_CARD1_IEMSCT:
       sprintf(s,"%d",c->IEMSCT);
       break;
-    case 5:
+    case I_CARD1_IMULT:
       sprintf(s,"%d",c->IMULT);
       break;
-    case 6:
+    case I_CARD1_M1:
       sprintf(s,"%d",c->M1);
       break;
-    case 7:
+    case I_CARD1_M2:
       sprintf(s,"%d",c->M2);
       break;
-    case 8:
+    case I_CARD1_M3:
       sprintf(s,"%d",c->M3);
       break;
-    case 9:
+    case I_CARD1_M4:
       sprintf(s,"%d",c->M4);
       break;
-    case 10:
+    case I_CARD1_M5:
       sprintf(s,"%d",c->M5);
       break;
-    case 11:
+    case I_CARD1_M6:
       sprintf(s,"%d",c->M6);
       break;
-    case 12:
+    case I_CARD1_MDEF:
       sprintf(s,"%d",c->MDEF);
       break;
-    case 13:
+    case I_CARD1_IM:
       sprintf(s,"%d",c->IM);
       break;
-    case 14:
+    case I_CARD1_I_RD2C:
+      sprintf(s,"%d",c->I_RD2C);
+      break;
+    case I_CARD1_NOPRNT:
       sprintf(s,"%d",c->NOPRNT);
       break;
-    case 15:
+    case I_CARD1_TPTEMP:
       sprintf(s,"%.3f",c->TPTEMP);
       break;
-    case 16:
+    case I_CARD1_SURREF:
       sprintf(s,"%s",c->SURREF);
       break;
     default:

@@ -530,7 +530,7 @@ int GetOpt(int argn,char **args)
   while(1)
   {
     this_option_optind = optind?optind:1;
-    c = getopt_long(argn,args,":D:drvh",long_options,&option_index);
+    c = getopt_long(argn,args,":M:D:drvh",long_options,&option_index);
     if(c == -1) break;
 
     switch(c)
