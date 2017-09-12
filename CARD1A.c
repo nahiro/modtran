@@ -86,17 +86,37 @@ char CARD1A_description[CARD1A_NPAR][MAXLINE] =
 
 void CARD1A_write(const TAPE5_struct *t,FILE *fp)
 {
-  #ifdef OLDMODE
-  fprintf(fp,"%1s%1s%3d%1s%4d%10.5f%10s%10s%1s%1s%1s%1s%1s%1s%1s%1s%2s%10.3f\n",
-              t->card1a->DIS,t->card1a->DISAZM,t->card1a->NSTR,t->card1a->LSUN,t->card1a->ISUN,t->card1a->CO2MX,
-              t->card1a->H2OSTR,t->card1a->O3STR,"",t->card1a->LSUNFL,"",t->card1a->LBMNAM,"",t->card1a->LFLTNM,"",
-              t->card1a->H2OAER,"",t->card1a->SOLCON);
-  #else
-  fprintf(fp,"%1s%1s%3d%1s%4d%15.8f%15s%15s%1s%1s%1s%1s%1s%1s%1s%1s%2s%10.3f\n",
-              t->card1a->DIS,t->card1a->DISAZM,t->card1a->NSTR,t->card1a->LSUN,t->card1a->ISUN,t->card1a->CO2MX,
-              t->card1a->H2OSTR,t->card1a->O3STR,"",t->card1a->LSUNFL,"",t->card1a->LBMNAM,"",t->card1a->LFLTNM,"",
-              t->card1a->H2OAER,"",t->card1a->SOLCON);
-  #endif
+  switch(mod_v)
+  {
+    case MOD_V4:
+      #ifdef OLDMODE
+      fprintf(fp,"%1s%1s%3d%1s%4d%10.5f%10s%10s %1s %1s %1s %1s  %10.3f\n",
+                  t->card1a->DIS,t->card1a->DISAZM,t->card1a->NSTR,t->card1a->LSUN,t->card1a->ISUN,t->card1a->CO2MX,
+                  t->card1a->H2OSTR,t->card1a->O3STR,t->card1a->LSUNFL,t->card1a->LBMNAM,t->card1a->LFLTNM,
+                  t->card1a->H2OAER,t->card1a->SOLCON);
+      #else
+      fprintf(fp,"%1s%1s%3d%1s%4d%15.8f%15s%15s %1s %1s %1s %1s  %10.3f\n",
+                  t->card1a->DIS,t->card1a->DISAZM,t->card1a->NSTR,t->card1a->LSUN,t->card1a->ISUN,t->card1a->CO2MX,
+                  t->card1a->H2OSTR,t->card1a->O3STR,t->card1a->LSUNFL,t->card1a->LBMNAM,t->card1a->LFLTNM,
+                  t->card1a->H2OAER,t->card1a->SOLCON);
+      #endif
+      break;
+    case MOD_V5:
+      #ifdef OLDMODE
+      fprintf(fp,"%1s%1s%1s%3d%4.1f%10.5f%10s%10s%1d%1s %1s %1s %1s %1s%10.5f%1s%9.2f%10.3f%10.3f%10.3f%10d\n",
+                  t->card1a->DIS,t->card1a->DISAZM,t->card1a->DISALB,t->card1a->NSTR,t->card1a->SFWHM,t->card1a->CO2MX,
+                  t->card1a->H2OSTR,t->card1a->O3STR,t->card1a->C_PROF,t->card1a->LSUNFL,t->card1a->LBMNAM,t->card1a->LFLTNM,
+                  t->card1a->H2OAER,t->card1a->CDTDIR,t->card1a->SOLCON,
+                  t->card1a->CDASTM,t->card1a->ASTMC,t->card1a->ASTMX,t->card1a->ASTMO,t->card1a->AERRH,t->card1a->NSSALB);
+      #else
+      fprintf(fp,"%1s%1s%1s%3d%4.1f%15.8f%15s%15s%1d%1s %1s %1s %1s %1s%10.5f%1s%9.2f%10.3f%10.3f%10.3f%10d\n",
+                  t->card1a->DIS,t->card1a->DISAZM,t->card1a->DISALB,t->card1a->NSTR,t->card1a->SFWHM,t->card1a->CO2MX,
+                  t->card1a->H2OSTR,t->card1a->O3STR,t->card1a->C_PROF,t->card1a->LSUNFL,t->card1a->LBMNAM,t->card1a->LFLTNM,
+                  t->card1a->H2OAER,t->card1a->CDTDIR,t->card1a->SOLCON,
+                  t->card1a->CDASTM,t->card1a->ASTMC,t->card1a->ASTMX,t->card1a->ASTMO,t->card1a->AERRH,t->card1a->NSSALB);
+      #endif
+      break;
+  }
 }
 
 void CARD1A_print(const TAPE5_struct *t,FILE *fp)
