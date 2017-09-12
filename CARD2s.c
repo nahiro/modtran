@@ -109,25 +109,52 @@ void CARD2s_print(const TAPE5_struct *t)
   {
     CARD2B_print(t,stdout);
   }
-  if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->IM==1)
+  switch(mod_v)
   {
-    CARD2C_print(t,stdout);
-    for(i=0; i<t->card2c->ML; i++)
-    {
-      CARD2C1_print((t->card2c1)+i,i,stdout);
-      if(t->card2c->IRD1 == 1)
+    case MOD_V4:
+      if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->IM==1)
       {
-        CARD2C2_print((t->card2c2)+i,i,stdout);
-        if(t->card1->MDEF == 2)
+        CARD2C_print(t,stdout);
+        for(i=0; i<t->card2c->ML; i++)
         {
-          CARD2C2X_print((t->card2c2x)+i,i,stdout);
+          CARD2C1_print((t->card2c1)+i,i,stdout);
+          if(t->card2c->IRD1 == 1)
+          {
+            CARD2C2_print((t->card2c2)+i,i,stdout);
+            if(t->card1->MDEF == 2)
+            {
+              CARD2C2X_print((t->card2c2x)+i,i,stdout);
+            }
+          }
+          if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+          {
+            CARD2C3_print(t,i,stdout);
+          }
         }
       }
-      if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+      break;
+    case MOD_V5:
+      if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->I_RD2C==1)
       {
-        CARD2C3_print(t,i,stdout);
+        CARD2C_print(t,stdout);
+        for(i=0; i<t->card2c->ML; i++)
+        {
+          CARD2C1_print((t->card2c1)+i,i,stdout);
+          if(t->card2c->IRD1 == 1)
+          {
+            CARD2C2_print((t->card2c2)+i,i,stdout);
+            if(t->card1->MDEF == 2)
+            {
+              CARD2C2X_print((t->card2c2x)+i,i,stdout);
+            }
+          }
+          if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+          {
+            CARD2C3_print(t,i,stdout);
+          }
+        }
       }
-    }
+      break;
   }
   if(t->card2->IHAZE==7 || t->card2->ICLD==11 || strncmp(t->card2->ARUSS,"USS",3)==0)
   {
@@ -199,50 +226,102 @@ int CARD2s_read(TAPE5_struct *t,FILE *fp)
       CARD2B_write(t,stderr);
     }
   }
-  if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->IM==1)
+  switch(mod_v)
   {
-    if(CARD2C_read(t,fp) < 0) return -1;
-    if(vb)
-    {
-      fprintf(stderr,"<CARD2C>\n");
-      CARD2C_write(t,stderr);
-    }
-    for(i=0; i<t->card2c->ML; i++)
-    {
-      if(CARD2C1_read((t->card2c1)+i,fp) < 0) return -1;
-      if(vb)
+    case MOD_V4:
+      if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->IM==1)
       {
-        fprintf(stderr,"<CARD2C1>\n");
-        CARD2C1_write((t->card2c1)+i,stderr);
-      }
-      if(t->card2c->IRD1 == 1)
-      {
-        if(CARD2C2_read((t->card2c2)+i,fp) < 0) return -1;
+        if(CARD2C_read(t,fp) < 0) return -1;
         if(vb)
         {
-          fprintf(stderr,"<CARD2C2>\n");
-          CARD2C2_write((t->card2c2)+i,stderr);
+          fprintf(stderr,"<CARD2C>\n");
+          CARD2C_write(t,stderr);
         }
-        if(t->card1->MDEF == 2)
+        for(i=0; i<t->card2c->ML; i++)
         {
-          if(CARD2C2X_read((t->card2c2x)+i,fp) < 0) return -1;
+          if(CARD2C1_read((t->card2c1)+i,fp) < 0) return -1;
           if(vb)
           {
-            fprintf(stderr,"<CARD2C2X>\n");
-            CARD2C2X_write((t->card2c2x)+i,stderr);
+            fprintf(stderr,"<CARD2C1>\n");
+            CARD2C1_write((t->card2c1)+i,stderr);
+          }
+          if(t->card2c->IRD1 == 1)
+          {
+            if(CARD2C2_read((t->card2c2)+i,fp) < 0) return -1;
+            if(vb)
+            {
+              fprintf(stderr,"<CARD2C2>\n");
+              CARD2C2_write((t->card2c2)+i,stderr);
+            }
+            if(t->card1->MDEF == 2)
+            {
+              if(CARD2C2X_read((t->card2c2x)+i,fp) < 0) return -1;
+              if(vb)
+              {
+                fprintf(stderr,"<CARD2C2X>\n");
+                CARD2C2X_write((t->card2c2x)+i,stderr);
+              }
+            }
+          }
+          if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+          {
+            if(CARD2C3_read(t,i,fp) < 0) return -1;
+            if(vb)
+            {
+              fprintf(stderr,"<CARD2C3>\n");
+              CARD2C3_write(t,i,stderr);
+            }
           }
         }
       }
-      if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+      break;
+    case MOD_V5:
+      if((t->card1->MODEL==0||t->card1->MODEL==7||t->card1->MODEL==8) && t->card1->I_RD2C==1)
       {
-        if(CARD2C3_read(t,i,fp) < 0) return -1;
+        if(CARD2C_read(t,fp) < 0) return -1;
         if(vb)
         {
-          fprintf(stderr,"<CARD2C3>\n");
-          CARD2C3_write(t,i,stderr);
+          fprintf(stderr,"<CARD2C>\n");
+          CARD2C_write(t,stderr);
+        }
+        for(i=0; i<t->card2c->ML; i++)
+        {
+          if(CARD2C1_read((t->card2c1)+i,fp) < 0) return -1;
+          if(vb)
+          {
+            fprintf(stderr,"<CARD2C1>\n");
+            CARD2C1_write((t->card2c1)+i,stderr);
+          }
+          if(t->card2c->IRD1 == 1)
+          {
+            if(CARD2C2_read((t->card2c2)+i,fp) < 0) return -1;
+            if(vb)
+            {
+              fprintf(stderr,"<CARD2C2>\n");
+              CARD2C2_write((t->card2c2)+i,stderr);
+            }
+            if(t->card1->MDEF == 2)
+            {
+              if(CARD2C2X_read((t->card2c2x)+i,fp) < 0) return -1;
+              if(vb)
+              {
+                fprintf(stderr,"<CARD2C2X>\n");
+                CARD2C2X_write((t->card2c2x)+i,stderr);
+              }
+            }
+          }
+          if(t->card2c->IRD2==1 || t->card2c->IRD2==2)
+          {
+            if(CARD2C3_read(t,i,fp) < 0) return -1;
+            if(vb)
+            {
+              fprintf(stderr,"<CARD2C3>\n");
+              CARD2C3_write(t,i,stderr);
+            }
+          }
         }
       }
-    }
+      break;
   }
   if(t->card2->IHAZE==7 || t->card2->ICLD==11 || strncmp(t->card2->ARUSS,"USS",3)==0)
   {
