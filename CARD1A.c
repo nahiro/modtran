@@ -124,9 +124,44 @@ void CARD1A_print(const TAPE5_struct *t,FILE *fp)
   int n;
   char s[MAXLINE];
 
-  for(n=0; n<CARD1A_NPAR; n++)
+  switch(mod_v)
   {
-    fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD1A_ID,CARD1A_name[n],CARD1A_to_s(t->card1a,n,s),CARD1A_description[n]);
+    case MOD_V4:
+      for(n=0; n<CARD1A_NPAR; n++)
+      {
+        switch(n)
+        {
+          case I_CARD1A_DISALB:
+          case I_CARD1A_SFWHM:
+          case I_CARD1A_C_PROF:
+          case I_CARD1A_CDTDIR:
+          case I_CARD1A_CDASTM:
+          case I_CARD1A_ASTMC:
+          case I_CARD1A_ASTMX:
+          case I_CARD1A_ASTMO:
+          case I_CARD1A_AERRH:
+          case I_CARD1A_NSSALB:
+            break;
+          default:
+            fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD1A_ID,CARD1A_name[n],CARD1A_to_s(t->card1a,n,s),CARD1A_description[n]);
+            break;
+        }
+      }
+      break;
+    case MOD_V5:
+      for(n=0; n<CARD1A_NPAR; n++)
+      {
+        switch(n)
+        {
+          case I_CARD1A_LSUN:
+          case I_CARD1A_ISUN:
+            break;
+          default:
+            fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD1A_ID,CARD1A_name[n],CARD1A_to_s(t->card1a,n,s),CARD1A_description[n]);
+            break;
+        }
+      }
+      break;
   }
 }
 
