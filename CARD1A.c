@@ -329,6 +329,8 @@ int CARD1A_gets(char *line,TAPE5_struct *t)
   {
     case I_CARD1A_NSTR:
     case I_CARD1A_ISUN:
+    case I_CARD1A_C_PROF:
+    case I_CARD1A_NSSALB:
       errno = 0;
       ntmp = strtol(str[2],&p,10);
       if(errno==ERANGE || *p!='\0')
@@ -337,8 +339,13 @@ int CARD1A_gets(char *line,TAPE5_struct *t)
         return -1;
       }
       break;
+    case I_CARD1A_SFWHM:
     case I_CARD1A_CO2MX:
     case I_CARD1A_SOLCON:
+    case I_CARD1A_ASTMC:
+    case I_CARD1A_ASTMX:
+    case I_CARD1A_ASTMO:
+    case I_CARD1A_AERRH:
       errno = 0;
       xtmp = strtod(str[2],&p);
       if(errno==ERANGE || *p!='\0')
@@ -350,49 +357,125 @@ int CARD1A_gets(char *line,TAPE5_struct *t)
   }
 
   // set value
-  switch(n)
+  switch(mod_v)
   {
-    case I_CARD1A_DIS:
-      strncpy(t->card1a->DIS,str[2],sizeof(t->card1a->DIS));
+    case MOD_V4:
+      switch(n)
+      {
+        case I_CARD1A_DIS:
+          strncpy(t->card1a->DIS,str[2],sizeof(t->card1a->DIS));
+          break;
+        case I_CARD1A_DISAZM:
+          strncpy(t->card1a->DISAZM,str[2],sizeof(t->card1a->DISAZM));
+          break;
+        case I_CARD1A_NSTR:
+          t->card1a->NSTR = ntmp;
+          break;
+        case I_CARD1A_LSUN:
+          strncpy(t->card1a->LSUN,str[2],sizeof(t->card1a->LSUN));
+          break;
+        case I_CARD1A_ISUN:
+          t->card1a->ISUN = ntmp;
+          break;
+        case I_CARD1A_CO2MX:
+          t->card1a->CO2MX = xtmp;
+          break;
+        case I_CARD1A_H2OSTR:
+          strncpy(t->card1a->H2OSTR,str[2],sizeof(t->card1a->H2OSTR));
+          break;
+        case I_CARD1A_O3STR:
+          strncpy(t->card1a->O3STR,str[2],sizeof(t->card1a->O3STR));
+          break;
+        case I_CARD1A_LSUNFL:
+          strncpy(t->card1a->LSUNFL,str[2],sizeof(t->card1a->LSUNFL));
+          break;
+        case I_CARD1A_LBMNAM:
+          strncpy(t->card1a->LBMNAM,str[2],sizeof(t->card1a->LBMNAM));
+          break;
+        case I_CARD1A_LFLTNM:
+          strncpy(t->card1a->LFLTNM,str[2],sizeof(t->card1a->LFLTNM));
+          break;
+        case I_CARD1A_H2OAER:
+          strncpy(t->card1a->H2OAER,str[2],sizeof(t->card1a->H2OAER));
+          break;
+        case I_CARD1A_SOLCON:
+          t->card1a->SOLCON = xtmp;
+          break;
+        default:
+          return -1;
+          break;
+      }
       break;
-    case I_CARD1A_DISAZM:
-      strncpy(t->card1a->DISAZM,str[2],sizeof(t->card1a->DISAZM));
-      break;
-    case I_CARD1A_NSTR:
-      t->card1a->NSTR = ntmp;
-      break;
-    case I_CARD1A_LSUN:
-      strncpy(t->card1a->LSUN,str[2],sizeof(t->card1a->LSUN));
-      break;
-    case I_CARD1A_ISUN:
-      t->card1a->ISUN = ntmp;
-      break;
-    case I_CARD1A_CO2MX:
-      t->card1a->CO2MX = xtmp;
-      break;
-    case I_CARD1A_H2OSTR:
-      strncpy(t->card1a->H2OSTR,str[2],sizeof(t->card1a->H2OSTR));
-      break;
-    case I_CARD1A_O3STR:
-      strncpy(t->card1a->O3STR,str[2],sizeof(t->card1a->O3STR));
-      break;
-    case I_CARD1A_LSUNFL:
-      strncpy(t->card1a->LSUNFL,str[2],sizeof(t->card1a->LSUNFL));
-      break;
-    case I_CARD1A_LBMNAM:
-      strncpy(t->card1a->LBMNAM,str[2],sizeof(t->card1a->LBMNAM));
-      break;
-    case I_CARD1A_LFLTNM:
-      strncpy(t->card1a->LFLTNM,str[2],sizeof(t->card1a->LFLTNM));
-      break;
-    case I_CARD1A_H2OAER:
-      strncpy(t->card1a->H2OAER,str[2],sizeof(t->card1a->H2OAER));
-      break;
-    case I_CARD1A_SOLCON:
-      t->card1a->SOLCON = xtmp;
-      break;
-    default:
-      return -1;
+    case MOD_V5:
+      switch(n)
+      {
+        case I_CARD1A_DIS:
+          strncpy(t->card1a->DIS,str[2],sizeof(t->card1a->DIS));
+          break;
+        case I_CARD1A_DISAZM:
+          strncpy(t->card1a->DISAZM,str[2],sizeof(t->card1a->DISAZM));
+          break;
+        case I_CARD1A_DISALB:
+          strncpy(t->card1a->DISALB,str[2],sizeof(t->card1a->DISALB));
+          break;
+        case I_CARD1A_NSTR:
+          t->card1a->NSTR = ntmp;
+          break;
+        case I_CARD1A_SFWHM:
+          t->card1a->ISUN = xtmp;
+          break;
+        case I_CARD1A_CO2MX:
+          t->card1a->CO2MX = xtmp;
+          break;
+        case I_CARD1A_H2OSTR:
+          strncpy(t->card1a->H2OSTR,str[2],sizeof(t->card1a->H2OSTR));
+          break;
+        case I_CARD1A_O3STR:
+          strncpy(t->card1a->O3STR,str[2],sizeof(t->card1a->O3STR));
+          break;
+        case I_CARD1A_C_PROF:
+          t->card1a->C_PROF = ntmp;
+          break;
+        case I_CARD1A_LSUNFL:
+          strncpy(t->card1a->LSUNFL,str[2],sizeof(t->card1a->LSUNFL));
+          break;
+        case I_CARD1A_LBMNAM:
+          strncpy(t->card1a->LBMNAM,str[2],sizeof(t->card1a->LBMNAM));
+          break;
+        case I_CARD1A_LFLTNM:
+          strncpy(t->card1a->LFLTNM,str[2],sizeof(t->card1a->LFLTNM));
+          break;
+        case I_CARD1A_H2OAER:
+          strncpy(t->card1a->H2OAER,str[2],sizeof(t->card1a->H2OAER));
+          break;
+        case I_CARD1A_CDTDIR:
+          strncpy(t->card1a->CDTDIR,str[2],sizeof(t->card1a->CDTDIR));
+          break;
+        case I_CARD1A_SOLCON:
+          t->card1a->SOLCON = xtmp;
+          break;
+        case I_CARD1A_CDASTM:
+          strncpy(t->card1a->CDASTM,str[2],sizeof(t->card1a->CDASTM));
+          break;
+        case I_CARD1A_ASTMC:
+          t->card1a->ASTMC = xtmp;
+          break;
+        case I_CARD1A_ASTMX:
+          t->card1a->ASTMX = xtmp;
+          break;
+        case I_CARD1A_ASTMO:
+          t->card1a->ASTMO = xtmp;
+          break;
+        case I_CARD1A_AERRH:
+          t->card1a->AERRH = xtmp;
+          break;
+        case I_CARD1A_NSSALB:
+          t->card1a->NSSALB = ntmp;
+          break;
+        default:
+          return -1;
+          break;
+      }
       break;
   }
 
@@ -457,6 +540,9 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
     case I_CARD1A_DISAZM:
       sprintf(s,"%s",c->DISAZM);
       break;
+    case I_CARD1A_DISALB:
+      sprintf(s,"%s",c->DISALB);
+      break;
     case I_CARD1A_NSTR:
       sprintf(s,"%d",c->NSTR);
       break;
@@ -466,6 +552,9 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
     case I_CARD1A_ISUN:
       sprintf(s,"%d",c->ISUN);
       break;
+    case I_CARD1A_SFWHM:
+      sprintf(s,"%.1f",c->SFWHM);
+      break;
     case I_CARD1A_CO2MX:
       sprintf(s,"%.5f",c->CO2MX);
       break;
@@ -474,6 +563,9 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
       break;
     case I_CARD1A_O3STR:
       sprintf(s,"%s",c->O3STR);
+      break;
+    case I_CARD1A_C_PROF:
+      sprintf(s,"%d",c->C_PROF);
       break;
     case I_CARD1A_LSUNFL:
       sprintf(s,"%s",c->LSUNFL);
@@ -487,8 +579,29 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
     case I_CARD1A_H2OAER:
       sprintf(s,"%s",c->H2OAER);
       break;
+    case I_CARD1A_CDTDIR:
+      sprintf(s,"%s",c->CDTDIR);
+      break;
     case I_CARD1A_SOLCON:
       sprintf(s,"%.3f",c->SOLCON);
+      break;
+    case I_CARD1A_CDASTM:
+      sprintf(s,"%s",c->CDASTM);
+      break;
+    case I_CARD1A_ASTMC:
+      sprintf(s,"%.3f",c->ASTMC);
+      break;
+    case I_CARD1A_ASTMX:
+      sprintf(s,"%.3f",c->ASTMX);
+      break;
+    case I_CARD1A_ASTMO:
+      sprintf(s,"%.3f",c->ASTMO);
+      break;
+    case I_CARD1A_AERRH:
+      sprintf(s,"%.3f",c->AERRH);
+      break;
+    case I_CARD1A_NSSALB:
+      sprintf(s,"%d",c->NSSALB);
       break;
     default:
       sprintf(s,"?");
@@ -500,6 +613,9 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
     case I_CARD1A_DISAZM:
       sprintf(s,"%s",c->DISAZM);
       break;
+    case I_CARD1A_DISALB:
+      sprintf(s,"%s",c->DISALB);
+      break;
     case I_CARD1A_NSTR:
       sprintf(s,"%d",c->NSTR);
       break;
@@ -509,6 +625,9 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
     case I_CARD1A_ISUN:
       sprintf(s,"%d",c->ISUN);
       break;
+    case I_CARD1A_SFWHM:
+      sprintf(s,"%.1f",c->SFWHM);
+      break;
     case I_CARD1A_CO2MX:
       sprintf(s,"%.8f",c->CO2MX);
       break;
@@ -517,6 +636,9 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
       break;
     case I_CARD1A_O3STR:
       sprintf(s,"%s",c->O3STR);
+      break;
+    case I_CARD1A_C_PROF:
+      sprintf(s,"%d",c->C_PROF);
       break;
     case I_CARD1A_LSUNFL:
       sprintf(s,"%s",c->LSUNFL);
@@ -530,8 +652,29 @@ char *CARD1A_to_s(const CARD1A_struct *c,int n,char *s)
     case I_CARD1A_H2OAER:
       sprintf(s,"%s",c->H2OAER);
       break;
+    case I_CARD1A_CDTDIR:
+      sprintf(s,"%s",c->CDTDIR);
+      break;
     case I_CARD1A_SOLCON:
       sprintf(s,"%.3f",c->SOLCON);
+      break;
+    case I_CARD1A_CDASTM:
+      sprintf(s,"%s",c->CDASTM);
+      break;
+    case I_CARD1A_ASTMC:
+      sprintf(s,"%.3f",c->ASTMC);
+      break;
+    case I_CARD1A_ASTMX:
+      sprintf(s,"%.3f",c->ASTMX);
+      break;
+    case I_CARD1A_ASTMO:
+      sprintf(s,"%.3f",c->ASTMO);
+      break;
+    case I_CARD1A_AERRH:
+      sprintf(s,"%.3f",c->AERRH);
+      break;
+    case I_CARD1A_NSSALB:
+      sprintf(s,"%d",c->NSSALB);
       break;
     default:
       sprintf(s,"?");
