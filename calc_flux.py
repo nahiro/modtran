@@ -23,6 +23,36 @@ WMAX = 1500.0 # Max. wavelength in nm
 MODTRAN_DATDIR = '/usr/local/Mod5.2.0.0/org/DATA'
 MODTRAN_BINDIR = '/usr/local/Mod5.2.0.0/org'
 
+def PolToPol(th,ph,thi,phi,radians=True):
+    if radians:
+        th_r = th
+        ph_r = ph
+        thi_r = thi
+        phi_r = phi
+    else:
+        th_r = np.radians(th)
+        ph_r = np.radians(ph)
+        thi_r = np.radians(thi)
+        phi_r = np.radians(phi)
+    th_c = np.cos(th_r)
+    th_s = np.sin(th_r)
+    ph_c = np.cos(ph_r)
+    ph_s = np.sin(ph_r)
+    v_x = np.array([th_c*ph_c,th_c*ph_s,-th_s])
+    v_y = np.array([-ph_s,ph_c,0.0])
+    v_z = np.array([th_s*ph_c,th_s*ph_s,th_c])
+    thi_c = np.cos(thi_r)
+    thi_s = np.sin(thi_r)
+    phi_c = np.cos(phi_r)
+    phi_s = np.sin(phi_r)
+    v_i = thi_s*phi_c*v_x+thi_s*phi_s*v_y+thi_c*v_z
+    tho = np.arctan2(np.sqrt(v_i[0]*v_i[0]+v_i[1]*v_i[1]),v_i[2])
+    pho = np.arctan2(v_i[1],v_i[0])
+    if radians:
+        return tho,pho
+    else:
+        return np.degrees(tho),np.degrees(pho)
+
 def run_modtran(th_los=60.0,ph_los=0.0,th_sun=TH_SUN,ph_sun=PH_SUN,iaer=IAER,vis=VIS,wmin=WMIN,wmax=WMAX,fluxout=False):
     for fnam in ['modtran.7sc','modtran.flx','modtran.plt','modtran.psc','modtran.tp6','modtran.tp7']:
         if os.path.exists(fnam):
@@ -65,9 +95,10 @@ def get_radiance():
 
 th_pnl_r = np.radians(TH_PNL)
 ph_pnl_r = np.radians(PH_PNL)
-v_pnl = np.array([np.sin(th_pnl_r)*np.cos(ph_pnl_r),np.sin(th_pnl_r)*np.sin(ph_pnl_r),np.cos(th_pnl_r)])
+th_pnl_s = np.sin(th_pnl_r)
+v_pnl = np.array([th_pnl_s*np.cos(ph_pnl_r),th_pnl_s*np.sin(ph_pnl_r),np.cos(th_pnl_r)])
 
-dth = 90.0/NTH
+dth = 180.0/NTH
 dth_r = np.radians(dth)
 dlen = 2.0*np.pi*np.sin(0.5*dth_r)
 k = 0
@@ -103,8 +134,11 @@ for i in range(NTH):
         wi,yr = get_radiance()
         th_los_r = np.radians(th_los)
         ph_los_r = np.radians(ph_los)
-        v_los = np.array([np.sin(th_los_r)*np.cos(ph_los_r),np.sin(th_los_r)*np.sin(ph_los_r),np.cos(th_los_r)])
+        th_los_s = np.sin(th_los_r)
+        v_los = np.array([th_los_s*np.cos(ph_los_r),th_los_s*np.sin(ph_los_r),np.cos(th_los_r)])
         yi += yr*np.dot(v_pnl,v_los)*domg
+        break
+    break
 run_modtran(0.0,0.0,fluxout=True)
 wf,fu,fd,fs = get_flux()
 
