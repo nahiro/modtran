@@ -11,7 +11,7 @@ except ImportError:
     from StringIO import StringIO
 
 #NTH = 16
-NTH = 4
+NTH = 32
 TH_SUN = 20.0 # Solar zenith angle in deg
 PH_SUN = 0.0 # Solar azimuth angle in deg
 TH_PNL = 0.0 # Zenith angle of solar panel's normal direction in deg
@@ -93,13 +93,14 @@ def get_radiance():
     w = 1.0e7/f[::-1]
     return w,(y*fact)[::-1]
 
+th_sun_r = np.radians(TH_SUN)
+ph_sun_r = np.radians(PH_SUN)
 th_pnl_r = np.radians(TH_PNL)
 ph_pnl_r = np.radians(PH_PNL)
 th_pnl_s = np.sin(th_pnl_r)
 v_pnl = np.array([th_pnl_s*np.cos(ph_pnl_r),th_pnl_s*np.sin(ph_pnl_r),np.cos(th_pnl_r)])
 
-dth = 180.0/NTH
-dth_r = np.radians(dth)
+dth_r = np.pi/NTH
 dlen = 2.0*np.pi*np.sin(0.5*dth_r)
 k = 0
 for i in range(NTH):
@@ -109,7 +110,17 @@ for i in range(NTH):
     nph = int(2.0*np.pi*np.sin(th_c)/dlen+0.5)
     if nph <= 1:
         nph = 1
-    k += nph
+        dph_r = 0.0
+        th_los_r = np.pi if th_c > 0.5*np.pi else 0.0
+    else:
+        dph_r = 2.0*np.pi/nph
+        th_los_r = th_c
+    for j in range(nph):
+        ph_los_r = dph_r*(float(j)+0.5)
+        th_los_o,ph_los_o = PolToPol(th_sun_r,ph_sun_r,th_los_r,ph_los_r,radians=True)
+        if th_los_o > 0.5*np.pi:
+            continue
+        k += 1
 kmax = k
 k = 0
 yi = 0.0
@@ -120,25 +131,27 @@ for i in range(NTH):
     nph = int(2.0*np.pi*np.sin(th_c)/dlen+0.5)
     if nph <= 1:
         nph = 1
-        dph = 0.0
-        th_los = 0.0
+        dph_r = 0.0
+        th_los_r = np.pi if th_c > 0.5*np.pi else 0.0
     else:
-        dph = 360.0/nph
-        th_los = np.degrees(th_c)
+        dph_r = 2.0*np.pi/nph
+        th_los_r = th_c
     domg = 2.0*np.pi*(np.cos(th_1)-np.cos(th_2))/nph
     for j in range(nph):
-        k += 1
-        sys.stderr.write('{:4d} {:4d} {:4d}/{:4d}\n'.format(i,j,k,kmax))
-        ph_los = dph*(float(j)+0.5)
+        ph_los_r = dph_r*(float(j)+0.5)
+        th_los_o,ph_los_o = PolToPol(th_sun_r,ph_sun_r,th_los_r,ph_los_r,radians=True)
+        if th_los_o > 0.5*np.pi:
+            continue
+        sys.stderr.write('{:4d} {:4d} {:4d}/{:4d}\n'.format(i,j,k+1,kmax))
+        th_los = np.degrees(th_los_o)
+        ph_los = np.degrees(ph_los_o)
+        sys.stderr.write('{:9.4f} {:9.4f} {:9.4f} {:9.4f}\n'.format(np.degrees(th_los_r),np.degrees(ph_los_r),th_los,ph_los))
         run_modtran(th_los,ph_los)
         wi,yr = get_radiance()
-        th_los_r = np.radians(th_los)
-        ph_los_r = np.radians(ph_los)
-        th_los_s = np.sin(th_los_r)
-        v_los = np.array([th_los_s*np.cos(ph_los_r),th_los_s*np.sin(ph_los_r),np.cos(th_los_r)])
+        th_los_s = np.sin(th_los_o)
+        v_los = np.array([th_los_s*np.cos(ph_los_o),th_los_s*np.sin(ph_los_o),np.cos(th_los_o)])
         yi += yr*np.dot(v_pnl,v_los)*domg
-        break
-    break
+        k += 1
 run_modtran(0.0,0.0,fluxout=True)
 wf,fu,fd,fs = get_flux()
 
