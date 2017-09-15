@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -86,6 +87,7 @@ with open('flux.dat','w') as fp:
     for i in range(wlen_flux.size):
         fp.write('{:10.2f} {:13.6e} {:13.6e} {:13.6e} {:13.6e}\n'.format(wlen_flux[i],flux_sum[i],flux_up[i],flux_dwn[i],flux_sun[i]))
 
+"""
 plt.interactive(True)
 fig = plt.figure(1,facecolor='w',figsize=(6,3.5))
 fig.clear()
@@ -104,3 +106,4 @@ ax1.pcolormesh(np.cos(xe),ye,zm,norm=LogNorm())
 #ax1.pcolormesh(np.cos(xe),ye,domg)
 #ax1.pcolormesh(xe*180.0/PI,ye,fact)
 plt.draw()
+"""

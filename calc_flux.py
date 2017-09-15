@@ -58,7 +58,6 @@ def Pol0ToPol(th0,ph0,thi,phi,radians=True): # thi,phi ... measured in the (th0,
         return np.degrees(tho),np.degrees(pho)
 
 def run_modtran(th_los=0.0,ph_los=0.0,th_sun=TH_SUN,ph_sun=PH_SUN,iaer=IAER,vis=VIS,albedo=ALBEDO,wmin=WMIN,wmax=WMAX,band_model=BAND_MODEL,disort=DISORT,nstr=NSTR,flux_out=False):
-
     for fnam in ['modtran.7sc','modtran.flx','modtran.plt','modtran.psc','modtran.tp6','modtran.tp7']:
         if os.path.exists(fnam):
             os.remove(fnam)
