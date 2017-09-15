@@ -4,7 +4,6 @@ import sys
 import re
 import numpy as np
 from subprocess import call
-from scipy.interpolate import splrep,splev
 try:
     from io import StringIO
 except ImportError:
@@ -17,13 +16,11 @@ NTH = 30
 NPH = 30
 TH_SUN = 20.0 # Solar zenith angle in deg
 PH_SUN = 110.0 # Solar azimuth angle in deg
-TH_PNL = 0.0 # Zenith angle of solar panel's normal direction in deg
-PH_PNL = 0.0 # Azimuth angle of solar panel's normal direction in deg
 IAER = 1 # Rural aerosol model
 VIS = 20.0 # Visibility in km
 ALBEDO = 0.1 # Surface albedo
 WMIN = 300.0 # Min. wavelength in nm
-WMAX = 500.0 # Max. wavelength in nm
+WMAX = 1500.0 # Max. wavelength in nm
 BAND_MODEL = 15
 DISORT = False
 NSTR = 16
@@ -103,14 +100,6 @@ def get_radiance():
 
 th_sun_r = np.radians(TH_SUN)
 ph_sun_r = np.radians(PH_SUN)
-th_pnl_r = np.radians(TH_PNL)
-ph_pnl_r = np.radians(PH_PNL)
-th_pnl_c = np.cos(th_pnl_r)
-th_pnl_s = np.sin(th_pnl_r)
-ph_pnl_c = np.cos(ph_pnl_r)
-ph_pnl_s = np.sin(ph_pnl_r)
-v_pnl = np.array([th_pnl_s*ph_pnl_c,th_pnl_s*ph_pnl_s,th_pnl_c])
-
 dth_r = PI/NTH
 dph_r = PI2/NPH
 tgrd = []

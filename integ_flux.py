@@ -4,6 +4,9 @@ import matplotlib.cm as cm
 from matplotlib.pylab import griddata
 from matplotlib.colors import LogNorm
 
+TH_PNL = 0.0 # Zenith angle of solar panel's normal direction in deg
+PH_PNL = 0.0 # Azimuth angle of solar panel's normal direction in deg
+
 data = np.load('flux.npz')
 th = data['th']
 ph = data['ph']
@@ -22,6 +25,14 @@ a,indx = np.unique(xdat+ydat*1.0j,return_index=True)
 xdat = xdat[indx]
 ydat = ydat[indx]
 zdat = zdat[indx]
+
+th_pnl_r = np.radians(TH_PNL)
+ph_pnl_r = np.radians(PH_PNL)
+th_pnl_c = np.cos(th_pnl_r)
+th_pnl_s = np.sin(th_pnl_r)
+ph_pnl_c = np.cos(ph_pnl_r)
+ph_pnl_s = np.sin(ph_pnl_r)
+v_pnl = np.array([th_pnl_s*ph_pnl_c,th_pnl_s*ph_pnl_s,th_pnl_c])
 
 nth = 100
 th_min = 0.0
