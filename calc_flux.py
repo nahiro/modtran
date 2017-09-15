@@ -154,7 +154,7 @@ for k in range(kmax):
     zgrd.append(yr)
 zgrd = np.array(zgrd)
 
-#run_modtran(0.0,0.0,fluxout=True)
-#wf,fu,fd,fs = get_flux()
+run_modtran(0.0,0.0,fluxout=True)
+wf,fu,fd,fs = get_flux()
 
-
+np.savez('flux.npz',tgrd=tgrd,pgrd=pgrd,dgrd=dgrd,zgrd=zgrd,wi=wi,wf=wf,fu=fu,fd=fd,fs=fs)
