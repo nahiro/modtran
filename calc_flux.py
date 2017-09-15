@@ -68,7 +68,7 @@ def run_modtran(th_los=0.0,ph_los=0.0,th_sun=TH_SUN,ph_sun=PH_SUN,iaer=IAER,vis=
     with open('mod5root.in','w') as fp:
         fp.write('modtran\n')
     with open('modtran.tp5','w') as fp:
-        fp.write('mmf+2    3    2    1    0    0    0    0    0    0    0    0    1    .000{:7s}\n'.format(str(albedo)))
+        fp.write('mmf+2    3    2    1    0    0    0    0    0    0    0    0    1    .000{:>7s}\n'.format(str(albedo)))
         fp.write('{:1s}t {:3d} 0.0380.0000001.000000001.000000000f t f f\n'.format('s' if str(disort)[0].lower()=='s' else 't' if disort else 'f',nstr))
         fp.write('{}_2008\n'.format('p{:0f}'.format(band_model*10) if band_model<1 else '{:02d}'.format(int(band_model+0.1))))
         fp.write('  {:3d}    0    0    0    0    0{:10.5f}.000000000.000000000.000000000.000000000\n'.format(iaer,vis))
