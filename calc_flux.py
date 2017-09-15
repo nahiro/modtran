@@ -16,15 +16,17 @@ PI_2 = 0.5*PI
 NTH = 30
 NPH = 30
 TH_SUN = 20.0 # Solar zenith angle in deg
-#PH_SUN = 210.0 # Solar azimuth angle in deg
 PH_SUN = 110.0 # Solar azimuth angle in deg
 TH_PNL = 0.0 # Zenith angle of solar panel's normal direction in deg
 PH_PNL = 0.0 # Azimuth angle of solar panel's normal direction in deg
 IAER = 1 # Rural aerosol model
 VIS = 20.0 # Visibility in km
+ALBEDO = 0.1 # Surface albedo
 WMIN = 300.0 # Min. wavelength in nm
-#WMAX = 1500.0 # Max. wavelength in nm
 WMAX = 500.0 # Max. wavelength in nm
+BAND_MODEL = 15
+DISORT = False
+NSTR = 16
 MODTRAN_DATDIR = '/usr/local/Mod5.2.0.0/org/DATA'
 MODTRAN_BINDIR = '/usr/local/Mod5.2.0.0/org'
 
@@ -58,21 +60,22 @@ def Pol0ToPol(th0,ph0,thi,phi,radians=True): # thi,phi ... measured in the (th0,
     else:
         return np.degrees(tho),np.degrees(pho)
 
-def run_modtran(th_los=60.0,ph_los=0.0,th_sun=TH_SUN,ph_sun=PH_SUN,iaer=IAER,vis=VIS,wmin=WMIN,wmax=WMAX,fluxout=False):
+def run_modtran(th_los=0.0,ph_los=0.0,th_sun=TH_SUN,ph_sun=PH_SUN,iaer=IAER,vis=VIS,albedo=ALBEDO,wmin=WMIN,wmax=WMAX,band_model=BAND_MODEL,disort=DISORT,nstr=NSTR,flux_out=False):
+
     for fnam in ['modtran.7sc','modtran.flx','modtran.plt','modtran.psc','modtran.tp6','modtran.tp7']:
         if os.path.exists(fnam):
             os.remove(fnam)
     with open('mod5root.in','w') as fp:
         fp.write('modtran\n')
     with open('modtran.tp5','w') as fp:
-        fp.write('mmf+2    3    2    1    0    0    0    0    0    0    0    0    1    .000 0.1000\n')
-        fp.write('ft  16 0.0380.0000001.000000001.000000000f t f f\n')
-        fp.write('15_2008\n')
+        fp.write('mmf+2    3    2    1    0    0    0    0    0    0    0    0    1    .000{:7s}\n'.format(str(albedo)))
+        fp.write('{:1s}t {:3d} 0.0380.0000001.000000001.000000000f t f f\n'.format('s' if str(disort)[0].lower()=='s' else 't' if disort else 'f',nstr))
+        fp.write('{}_2008\n'.format('p{:0f}'.format(band_model*10) if band_model<1 else '{:02d}'.format(int(band_model+0.1))))
         fp.write('  {:3d}    0    0    0    0    0{:10.5f}.000000000.000000000.000000000.000000000\n'.format(iaer,vis))
         fp.write('    0.0000    0.0000{:10.4f}    0.0000     0.000     0.000    0          0.000\n'.format(th_los))
         fp.write('    2    2   93    0\n')
         fp.write('{:10.4f}{:10.4f}     0.000     0.000     0.000     0.000     0.000     0.000\n'.format(ph_sun-ph_los,th_sun))
-        fp.write('{:10.0f}{:10.0f}      15.0      30.0rw        {:10s}\n'.format(1.0e7/wmax,1.0e7/wmin,' t    f  1' if fluxout else ''))
+        fp.write('{:10.0f}{:10.0f}{:10.3f}{:10.3f}rw        {:10s}\n'.format(1.0e7/wmax,1.0e7/wmin,band_model,band_model*2,' t    f  1' if flux_out else ''))
         fp.write('    0\n')
     if not os.path.exists('DATA'):
         os.symlink(MODTRAN_DATDIR,'DATA')
@@ -154,7 +157,7 @@ for k in range(kmax):
     zgrd.append(yr)
 zgrd = np.array(zgrd)
 
-run_modtran(0.0,0.0,fluxout=True)
+run_modtran(0.0,0.0,flux_out=True)
 wf,fu,fd,fs = get_flux()
 
 np.savez('flux.npz',tgrd=tgrd,pgrd=pgrd,dgrd=dgrd,zgrd=zgrd,wi=wi,wf=wf,fu=fu,fd=fd,fs=fs)
