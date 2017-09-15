@@ -28,17 +28,18 @@ flux_up = data['flux_up']
 flux_dwn = data['flux_dwn']
 flux_sun = data['flux_sun']
 
+vdat = []
+for i in range(len(radiance)):
+    vdat.append(splev(wlen_flux,splrep(wlen,radiance[i])))
+vdat = np.array(vdat)
+
 xdat = np.concatenate((th,th,th,th))
 ydat = np.concatenate((dp,-dp,PI2-dp,-PI2+dp))
-zdat = np.concatenate((radiance,radiance,radiance,radiance))
+zdat = np.concatenate((vdat,vdat,vdat,vdat))
 dummy,indx = np.unique(xdat+ydat*1.0j,return_index=True)
 xdat = xdat[indx]
 ydat = ydat[indx]
 zdat = zdat[indx]
-vdat = []
-for i in range(len(zdat)):
-    vdat.append(splev(wlen_flux,splrep(wlen,zdat[i])))
-vdat = np.array(vdat)
 
 th_min = 0.0
 th_max = PI_2
@@ -69,7 +70,7 @@ th_los_s = np.sin(th_los_r)
 ph_los_c = np.cos(ph_los_r)
 ph_los_s = np.sin(ph_los_r)
 v_pnl = np.array([th_pnl_s*ph_pnl_c,th_pnl_s*ph_pnl_s,th_pnl_c]) # solar panel's normal vector
-v_los = np.array([th_los_s*ph_los_c,th_los_s*ph_los_s,th_los_c]) # LOS normal vector
+v_los = np.array([th_los_s*ph_los_c,th_los_s*ph_los_s,th_los_c]) # LOS directional vector
 fact = (v_pnl.reshape(3,1,1)*v_los).sum(axis=0)
 fact[fact<0.0] = 0.0 # no backside illumination
 fact *= domg
@@ -78,7 +79,7 @@ flux_sum = []
 for i in range(wlen_flux.size):
     if i==0 or (i+1)%100==0 or i==wlen_flux.size-1:
         sys.stderr.write('{:5d}/{:5d}\n'.format(i+1,wlen_flux.size))
-    zm = griddata(xdat,ydat,vdat[:,i],xm,ym)*fact
+    zm = griddata(xdat,ydat,zdat[:,i],xm,ym)*fact
     flux_sum.append(zm.sum())
 flux_sum = np.array(flux_sum)
 
