@@ -160,4 +160,4 @@ zgrd = np.array(zgrd)
 run_modtran(0.0,0.0,flux_out=True)
 wf,fu,fd,fs = get_flux()
 
-np.savez('flux.npz',tgrd=tgrd,pgrd=pgrd,dgrd=dgrd,zgrd=zgrd,wi=wi,wf=wf,fu=fu,fd=fd,fs=fs)
+np.savez('flux.npz',th=tgrd,ph=pgrd,dph=dgrd,radiance=zgrd,wlen=wi,wlen_flux=wf,flux_up=fu,flux_dwn=fd,flux_sun=fs)
