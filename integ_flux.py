@@ -82,8 +82,9 @@ for i in range(wlen_flux.size):
 flux_sum = np.array(flux_sum)
 
 with open('flux.dat','w') as fp:
+    fp.write('# {:>8s} {:>13s} {:>13s} {:>13s} {:>13s}\n'.format('wlen(nm)','flux(W/m2/um)','flux_up','flux_dwn','flux_sun'))
     for i in range(wlen_flux.size):
-        fp.write('{:8.2f} {:13.6e} {:13.6e} {:13.6e} {:13.6e}\n'.format(wlen_flux[i],flux_sum[i],flux_up[i],flux_dwn[i],flux_sun[i]))
+        fp.write('{:10.2f} {:13.6e} {:13.6e} {:13.6e} {:13.6e}\n'.format(wlen_flux[i],flux_sum[i],flux_up[i],flux_dwn[i],flux_sun[i]))
 
 plt.interactive(True)
 fig = plt.figure(1,facecolor='w',figsize=(6,3.5))
