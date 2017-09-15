@@ -76,10 +76,14 @@ fact *= domg
 flux_sum = []
 for i in range(wlen_flux.size):
     if i==0 or (i+1)%100==0 or i==wlen_flux.size-1:
-        sys.stderr.write('{}/{}\n'.format(i+1,wlen_flux.size))
+        sys.stderr.write('{:5d}/{:5d}\n'.format(i+1,wlen_flux.size))
     zm = griddata(xdat,ydat,vdat[:,i],xm,ym)*fact
     flux_sum.append(zm.sum())
 flux_sum = np.array(flux_sum)
+
+with open('flux.dat','w') as fp:
+    for i in range(wlen_flux.size):
+        fp.write('{:8.2f} {:13.6e} {:13.6e} {:13.6e} {:13.6e}\n'.format(wlen_flux[i],flux_sum[i],flux_up[i],flux_dwn[i],flux_sun[i]))
 
 plt.interactive(True)
 fig = plt.figure(1,facecolor='w',figsize=(6,3.5))
@@ -91,8 +95,8 @@ ax1.grid(True)
 #ax1.set_xlim(0.0,90.0)
 ax1.set_xlim(0.0,1.0)
 ax1.set_ylim(ph_min,ph_max)
-ax1.set_xlabel('')
-ax1.set_ylabel('')
+ax1.set_xlabel(r'cos($\theta$)')
+ax1.set_ylabel('$\phi$')
 ax1.xaxis.set_tick_params(pad=7)
 ax1.yaxis.set_label_coords(-0.10,0.5)
 ax1.pcolormesh(np.cos(xe),ye,zm,norm=LogNorm())
