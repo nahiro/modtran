@@ -136,7 +136,8 @@ dgrd = np.array(dgrd)
 kmax = tgrd.size
 zgrd = []
 for k in range(kmax):
-    sys.stderr.write('{:4d}/{:4d}\n'.format(k+1,kmax))
+    if k==0 or (k+1)%10==0 or k==kmax-1:
+        sys.stderr.write('{:4d}/{:4d}\n'.format(k+1,kmax))
     th_los_r = tgrd[k]
     ph_los_r = pgrd[k]
     th_los = np.degrees(th_los_r)

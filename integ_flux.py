@@ -1,9 +1,18 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.pylab import griddata
 from matplotlib.colors import LogNorm
+from scipy.interpolate import splrep,splev
 
+PI = np.pi
+PI2 = 2.0*PI
+PI_2 = 0.5*PI
+NTH = 100
+NPH = 100
+TH_SUN = 20.0 # Solar zenith angle in deg
+PH_SUN = 110.0 # Solar azimuth angle in deg
 TH_PNL = 0.0 # Zenith angle of solar panel's normal direction in deg
 PH_PNL = 0.0 # Azimuth angle of solar panel's normal direction in deg
 
@@ -19,37 +28,58 @@ flux_dwn = data['flux_dwn']
 flux_sun = data['flux_sun']
 
 xdat = np.concatenate((th,th,th,th))
-ydat = np.concatenate((dp,-dp,2.0*np.pi-dp,-2.0*np.pi+dp))
+ydat = np.concatenate((dp,-dp,PI2-dp,-PI2+dp))
 zdat = np.concatenate((radiance,radiance,radiance,radiance))
-a,indx = np.unique(xdat+ydat*1.0j,return_index=True)
+dummy,indx = np.unique(xdat+ydat*1.0j,return_index=True)
 xdat = xdat[indx]
 ydat = ydat[indx]
 zdat = zdat[indx]
+vdat = []
+for i in range(len(zdat)):
+    vdat.append(splev(wlen_flux,splrep(wlen,zdat[i])))
+vdat = np.array(vdat)
 
-th_pnl_r = np.radians(TH_PNL)
-ph_pnl_r = np.radians(PH_PNL)
-th_pnl_c = np.cos(th_pnl_r)
-th_pnl_s = np.sin(th_pnl_r)
-ph_pnl_c = np.cos(ph_pnl_r)
-ph_pnl_s = np.sin(ph_pnl_r)
-v_pnl = np.array([th_pnl_s*ph_pnl_c,th_pnl_s*ph_pnl_s,th_pnl_c])
-
-nth = 100
 th_min = 0.0
-th_max = 0.5*np.pi
-dth = (th_max-th_min)/nth
-nph = 100
-ph_min = -np.pi
-ph_max = np.pi
-dph = (ph_max-ph_min)/nph
+th_max = PI_2
+dth = (th_max-th_min)/NTH
+ph_min = -PI
+ph_max = PI
+dph = (ph_max-ph_min)/NPH
 xg = np.arange(th_min+0.5*dth,th_max,dth)
 yg = np.arange(ph_min+0.5*dph,ph_max,dph)
 xe = np.arange(th_min,th_max+0.1*dth,dth)
 ye = np.arange(ph_min,ph_max+0.1*dph,dph)
 xm,ym = np.meshgrid(xg,yg)
-dx,dy = np.meshgrid(-np.diff(np.cos(xe)),np.diff(ye))
-zm = griddata(xdat,ydat,zdat[:,400],xm,ym)
-domg = dx*dy
+dx,dy = np.meshgrid(-np.diff(np.cos(xe)),np.diff(ye)) # dcos(th), dph
+domg = dx*dy # Sum(domg) = PI2
+
+th_sun_r = np.radians(TH_SUN)
+ph_sun_r = np.radians(PH_SUN)
+th_pnl_r = np.radians(TH_PNL)
+ph_pnl_r = np.radians(PH_PNL)
+th_los_r = xm
+ph_los_r = ph_sun_r+ym
+th_pnl_c = np.cos(th_pnl_r)
+th_pnl_s = np.sin(th_pnl_r)
+ph_pnl_c = np.cos(ph_pnl_r)
+ph_pnl_s = np.sin(ph_pnl_r)
+th_los_c = np.cos(th_los_r)
+th_los_s = np.sin(th_los_r)
+ph_los_c = np.cos(ph_los_r)
+ph_los_s = np.sin(ph_los_r)
+v_pnl = np.array([th_pnl_s*ph_pnl_c,th_pnl_s*ph_pnl_s,th_pnl_c]) # solar panel's normal vector
+v_los = np.array([th_los_s*ph_los_c,th_los_s*ph_los_s,th_los_c]) # LOS normal vector
+fact = (v_pnl.reshape(3,1,1)*v_los).sum(axis=0)
+fact[fact<0.0] = 0.0 # no backside illumination
+fact *= domg
+
+flux_sum = []
+for i in range(wlen_flux.size):
+    if i==0 or (i+1)%100==0 or i==wlen_flux.size-1:
+        sys.stderr.write('{}/{}\n'.format(i+1,wlen_flux.size))
+    zm = griddata(xdat,ydat,vdat[:,i],xm,ym)*fact
+    flux_sum.append(zm.sum())
+flux_sum = np.array(flux_sum)
 
 plt.interactive(True)
 fig = plt.figure(1,facecolor='w',figsize=(6,3.5))
@@ -58,16 +88,14 @@ plt.subplots_adjust(top=0.85,bottom=0.20,left=0.15,right=0.90)
 ax1 = plt.subplot(111)
 ax1.minorticks_on()
 ax1.grid(True)
-#ax1.pcolormesh(np.cos(xe),ye,zm,norm=LogNorm())
-ax1.pcolormesh(np.cos(xe),ye,domg)
-#ax1.set_xlim(0.0,1.0)
-#ax1.set_ylim(0.0,1.0)
+#ax1.set_xlim(0.0,90.0)
+ax1.set_xlim(0.0,1.0)
+ax1.set_ylim(ph_min,ph_max)
 ax1.set_xlabel('')
 ax1.set_ylabel('')
-#ax1.xaxis.set_major_locator(plt.MultipleLocator(0.5))
-#ax1.yaxis.set_major_locator(plt.MultipleLocator(0.5))
 ax1.xaxis.set_tick_params(pad=7)
 ax1.yaxis.set_label_coords(-0.10,0.5)
-#ax1.legend(prop={'size':12},numpoints=1,ncol=4,loc=8,bbox_to_anchor=(0.5,1.01),frameon=False,columnspacing=1.0)
-#plt.savefig('')
+ax1.pcolormesh(np.cos(xe),ye,zm,norm=LogNorm())
+#ax1.pcolormesh(np.cos(xe),ye,domg)
+#ax1.pcolormesh(xe*180.0/PI,ye,fact)
 plt.draw()
