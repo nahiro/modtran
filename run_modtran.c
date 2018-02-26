@@ -361,6 +361,15 @@ double	sim_angl[SIM_N_ANGL] =
   176.0, 180.0,
 };
 double	*sim_dir[4]			= {NULL,NULL,NULL,NULL};
+double	*sim_tropo_aext			= NULL;
+double	*sim_strat_aext			= NULL;
+double	*sim_meteo_aext			= NULL;
+double	*sim_tropo_omeg			= NULL;
+double	*sim_strat_omeg			= NULL;
+double	*sim_meteo_omeg			= NULL;
+double	*sim_tropo_asym			= NULL;
+double	*sim_strat_asym			= NULL;
+double	*sim_meteo_asym			= NULL;
 double	*sim_phas			= NULL;
 double	*sim_tropo_phas			= NULL;
 double	*sim_strat_phas			= NULL;
@@ -520,7 +529,13 @@ char	mie_out0[MAXLINE]		= MIE_OUT0;		// Output file 0
 char	mie_out1[MAXLINE]		= MIE_OUT1;		// Output file 1
 char	mie_out2[MAXLINE]		= MIE_OUT2;		// Output file 2
 char	mie_inp1[MAXLINE]		= "\0";			// Input file 1
+char	mie_tropo_inp1[MAXLINE]		= "\0";			// Input file 1
+char	mie_strat_inp1[MAXLINE]		= "\0";			// Input file 1
+char	mie_meteo_inp1[MAXLINE]		= "\0";			// Input file 1
 char	mie_inp2[MAXLINE]		= "\0";			// Input file 2
+char	mie_tropo_inp2[MAXLINE]		= "\0";			// Input file 1
+char	mie_strat_inp2[MAXLINE]		= "\0";			// Input file 1
+char	mie_meteo_inp2[MAXLINE]		= "\0";			// Input file 1
 // Parameters for T-matrix calculation
 int	tmx_ndis			= TMX_NDIS;		// Distribution#
 int	tmx_nang			= TMX_NANG;		// #Angles
@@ -7984,6 +7999,9 @@ int Usage(void)
                                                "min line#(%d),max line#(10^%.0f)\n",
                                                NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
   fprintf(stderr,"mie_finp      name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_tropo_finp name        | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_strat_finp name        | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_meteo_finp name        | file name(%s)\n",NONAME);
   fprintf(stderr,"upp_rh        value        | RH of upper atmosphere in %%(%.1f)\n",UPP_RH);
   fprintf(stderr,"cld_thik      value        | Cloud thickness(%.1f)\n",CLD_THIK);
   fprintf(stderr,"cld_alt       value        | Cloud altitude(%.1f)\n",CLD_ALT);
