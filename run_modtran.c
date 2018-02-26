@@ -214,6 +214,7 @@
 #define	UPP_N_ANGL			34
 #define	UPP_N_PHAS			204
 #define	UPP_N_RHUM			4
+#define	UPP_RH				50.0			// RH of upper atmosphere in %
 // Constants for control
 #define	CNT_CONF			NONAME
 #define	CNT_MAXCMNT			30
@@ -543,6 +544,7 @@ double	upp_angl[UPP_N_ANGL] =
   175.0, 180.0,
 };
 double	upp_rhum[UPP_N_RHUM] = {0.0, 70.0, 80.0, 99.0};
+double	upp_rh = UPP_RH;
 double	upp_tropo_phas[UPP_N_RHUM][UPP_N_PHAS] =
 {
   {// RH=0%
@@ -1725,7 +1727,7 @@ int MieInit(void)
     mie_angl_dif[j] = PI*fabs(mie_angl_rad[j]-mie_angl_rad[j-1]);
   }
 
-  if(upper_pfunc(50.0) < 0) return -1;
+  if(upper_pfunc(upp_rh) < 0) return -1;
 
   return 0;
 }
@@ -2736,7 +2738,7 @@ int ReadMie(void)
     mie_angl_dif[j] = PI*fabs(mie_angl_rad[j]-mie_angl_rad[j-1]);
   }
 
-  if(upper_pfunc(50.0) < 0) return -1;
+  if(upper_pfunc(upp_rh) < 0) return -1;
 
   if(cnt_vb > 1)
   {
@@ -5715,6 +5717,26 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
+    if(strcasecmp(str[0],"upp_rh") == 0)
+    {
+      if(n > 1)
+      {
+        errno = 0;
+        xtmp = strtod(str[1],&p);
+        if(errno!=ERANGE && *p=='\0') upp_rh = xtmp;
+        else
+        {
+          fprintf(stderr,"%s: out of range >>> %s\n",fnam,line);
+          err = 1;
+          break;
+        }
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30.4e\n",str[0],upp_rh);
+        cnt_n_cmnt++;
+      }
+    } else
     if(strcasecmp(str[0],"cld_thik") == 0)
     {
       if(n > 1)
@@ -7962,6 +7984,7 @@ int Usage(void)
                                                "min line#(%d),max line#(10^%.0f)\n",
                                                NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
   fprintf(stderr,"mie_finp      name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"upp_rh        value        | RH of upper atmosphere in %%(%.1f)\n",UPP_RH);
   fprintf(stderr,"cld_thik      value        | Cloud thickness(%.1f)\n",CLD_THIK);
   fprintf(stderr,"cld_alt       value        | Cloud altitude(%.1f)\n",CLD_ALT);
   fprintf(stderr,"cld_ext       value        | Cloud extinction(%.1f)\n",CLD_EXT);
