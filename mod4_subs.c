@@ -548,7 +548,7 @@ int WriteCard3C_V4(FILE *fp)
   // CARD 3C2
   for(i=0; i<sim_n_wlen; i++)
   {
-    fprintf(fp,"%10.6f%s",sim_wlen_um[i],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+    fprintf(fp,"%10.6f%s",sim_phas_wlen_um[i],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
   }
   #ifdef OLDMODE
   // CARD 3C3

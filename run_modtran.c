@@ -344,13 +344,13 @@ double	sim_xsgm			= SIM_XSGM;		// X sigma
 double	sim_wsgm			= SIM_WSGM;		// X width in sigma
 double	sim_yuni			= SIM_YUNI;		// Y unit
 double	sim_dmax			= SIM_DMAX;		// Max wavelength difference in nm
-double	sim_wlen[SIM_MAXWLEN]		=
+double	sim_phas_wlen[SIM_MAXWLEN]	=
 {
   300.0, 337.1, 400.0,  488.0,  514.5, 550.0,
   632.8, 694.3, 860.0, 1060.0, 1300.0,
 };
-double	*sim_wlen_um			= NULL;
-double	sim_angl[SIM_N_ANGL] =
+double	*sim_phas_wlen_um		= NULL;
+double	sim_angl[SIM_N_ANGL]		=
 {
     0.0,   0.5,   1.0,   1.5,   2.0,   2.5,   3.0,   3.5,
     4.0,   4.5,   5.0,   6.0,   7.0,   8.0,   9.0,  10.0,
@@ -361,10 +361,25 @@ double	sim_angl[SIM_N_ANGL] =
   176.0, 180.0,
 };
 double	*sim_dir[4]			= {NULL,NULL,NULL,NULL};
-double	*sim_phas			= NULL;
-double	*sim_tropo_phas			= NULL;
-double	*sim_strat_phas			= NULL;
-double	*sim_meteo_phas			= NULL;
+double	*sim_aer2_wlen			= NULL;
+double	*sim_aer3_wlen			= NULL;
+double	*sim_aer4_wlen			= NULL;
+double	*sim_aer2_wlen_um		= NULL;
+double	*sim_aer3_wlen_um		= NULL;
+double	*sim_aer4_wlen_um		= NULL;
+double	*sim_aer2_cext			= NULL;
+double	*sim_aer3_cext			= NULL;
+double	*sim_aer4_cext			= NULL;
+double	*sim_aer2_cabs			= NULL;
+double	*sim_aer3_cabs			= NULL;
+double	*sim_aer4_cabs			= NULL;
+double	*sim_aer2_asym			= NULL;
+double	*sim_aer3_asym			= NULL;
+double	*sim_aer4_asym			= NULL;
+double	*sim_aer1_phas			= NULL;
+double	*sim_aer2_phas			= NULL;
+double	*sim_aer3_phas			= NULL;
+double	*sim_aer4_phas			= NULL;
 double	sim_wlen_min			= SIM_WLEN_MIN;		// Min wavelength in nm
 double	sim_wlen_max			= SIM_WLEN_MAX;		// Max wavelength in nm
 double	sim_th_sun			= SIM_TH_SUN;		// Solar zenith
@@ -447,7 +462,7 @@ int	mie_n_angl			= MIE_N_ANGL;		// #Angles
 int	mie_n_comp			= NODATA;		// #Components
 int	mie_n_step			= MIE_NSTP;		// Log10(R) #steps
 int	mie_n_size[MIE_MAXCOMP];				// #Size parameters
-int	mie_tropo_n_wlen		= NODATA;		// #Wavelengths (tropo)
+int	mie_aer2_n_wlen		= NODATA;		// #Wavelengths (tropo)
 int	mie_strat_n_wlen		= NODATA;		// #Wavelengths (strat)
 int	mie_meteo_n_wlen		= NODATA;		// #Wavelengths (meteo)
 char	mie_size_func[MIE_MAXCOMP];				// Size distribution function
@@ -466,21 +481,6 @@ double	*mie_wlen_um			= NULL;
 double	*mie_aext			= NULL;
 double	*mie_asca			= NULL;
 double	*mie_asym			= NULL;
-double	*mie_tropo_wlen			= NULL;
-double	*mie_strat_wlen			= NULL;
-double	*mie_meteo_wlen			= NULL;
-double	*mie_tropo_wlen_um		= NULL;
-double	*mie_strat_wlen_um		= NULL;
-double	*mie_meteo_wlen_um		= NULL;
-double	*mie_tropo_cext			= NULL;
-double	*mie_strat_cext			= NULL;
-double	*mie_meteo_cext			= NULL;
-double	*mie_tropo_cabs			= NULL;
-double	*mie_strat_cabs			= NULL;
-double	*mie_meteo_cabs			= NULL;
-double	*mie_tropo_asym			= NULL;
-double	*mie_strat_asym			= NULL;
-double	*mie_meteo_asym			= NULL;
 double	mie_angl_min			= MIE_ANGL_MIN;		// Min angle in degree
 double	mie_angl_max			= MIE_ANGL_MAX;		// Max angle in degree
 double	mie_angl[MIE_MAXDATA]		=
@@ -1574,7 +1574,7 @@ void Finish(void)
   free(mie_tropo_phas);
   free(mie_strat_phas);
   free(mie_meteo_phas);
-  free(sim_wlen_um);
+  free(sim_phas_wlen_um);
   free(sim_phas);
   free(sim_tropo_phas);
   free(sim_strat_phas);
@@ -1678,15 +1678,15 @@ int MieInit(void)
   {
     mie_wlen_um[i] = mie_wlen[i]*1.0e-3;
   }
-  sim_wlen_um = (double *)malloc(sim_n_wlen*sizeof(double));
-  if(sim_wlen_um == NULL)
+  sim_phas_wlen_um = (double *)malloc(sim_n_wlen*sizeof(double));
+  if(sim_phas_wlen_um == NULL)
   {
     fprintf(stderr,"%s: failed in allocating memory\n",fnam);
     return -1;
   }
   for(i=0; i<sim_n_wlen; i++)
   {
-    sim_wlen_um[i] = sim_wlen[i]*1.0e-3;
+    sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
   }
   mie_aext = (double *)malloc(mie_n_wlen*sizeof(double));
   mie_asca = (double *)malloc(mie_n_wlen*sizeof(double));
@@ -2424,7 +2424,7 @@ int MixComp(void)
   }
 
   if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
-              sim_wlen,sim_angl,sim_phas,sim_n_wlen,sim_n_angl,0) < 0)
+              sim_phas_wlen,sim_angl,sim_phas,sim_n_wlen,sim_n_angl,0) < 0)
   {
     return -1;
   }
@@ -2720,15 +2720,15 @@ int ReadMie(void)
   {
     mie_wlen_um[i] = mie_wlen[i]*1.0e-3;
   }
-  sim_wlen_um = (double *)malloc(sim_n_wlen*sizeof(double));
-  if(sim_wlen_um == NULL)
+  sim_phas_wlen_um = (double *)malloc(sim_n_wlen*sizeof(double));
+  if(sim_phas_wlen_um == NULL)
   {
     fprintf(stderr,"%s: failed in allocating memory\n",fnam);
     return -1;
   }
   for(i=0; i<sim_n_wlen; i++)
   {
-    sim_wlen_um[i] = sim_wlen[i]*1.0e-3;
+    sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
   }
   sim_phas = (double *)malloc(sim_n_wlen*sim_n_angl*sizeof(double));
   if(sim_phas == NULL)
@@ -2737,7 +2737,7 @@ int ReadMie(void)
     return -1;
   }
   if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
-              sim_wlen,sim_angl,sim_phas,sim_n_wlen,sim_n_angl,0) < 0)
+              sim_phas_wlen,sim_angl,sim_phas,sim_n_wlen,sim_n_angl,0) < 0)
   {
     return -1;
   }
@@ -2928,9 +2928,9 @@ int upper_pfunc(double rh)
     }
   }
 
-  Interp2D(mie_wlen,mie_angl,mie_tropo_phas,mie_n_wlen,mie_n_angl,sim_wlen,sim_angl,sim_tropo_phas,sim_n_wlen,sim_n_angl,1);
-  Interp2D(mie_wlen,mie_angl,mie_strat_phas,mie_n_wlen,mie_n_angl,sim_wlen,sim_angl,sim_strat_phas,sim_n_wlen,sim_n_angl,0);
-  Interp2D(mie_wlen,mie_angl,mie_meteo_phas,mie_n_wlen,mie_n_angl,sim_wlen,sim_angl,sim_meteo_phas,sim_n_wlen,sim_n_angl,0);
+  Interp2D(mie_wlen,mie_angl,mie_tropo_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_angl,sim_tropo_phas,sim_n_wlen,sim_n_angl,1);
+  Interp2D(mie_wlen,mie_angl,mie_strat_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_angl,sim_strat_phas,sim_n_wlen,sim_n_angl,0);
+  Interp2D(mie_wlen,mie_angl,mie_meteo_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_angl,sim_meteo_phas,sim_n_wlen,sim_n_angl,0);
 
   return 0;
 }
@@ -4388,7 +4388,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"sim_wlen") == 0)
+    if(strcasecmp(str[0],"sim_phas_wlen") == 0)
     {
       num = 0;
       uni = 1.0;
@@ -4420,7 +4420,7 @@ int ReadConfig(void)
       {
         if(strcmp(str[1],NONAME) != 0)
         {
-          if((sim_n_wlen=Read1A(str[1],SIM_MAXWLEN,num,uni,NULL,sim_wlen)) < 1)
+          if((sim_n_wlen=Read1A(str[1],SIM_MAXWLEN,num,uni,NULL,sim_phas_wlen)) < 1)
           {
             err = 1;
             break;
@@ -7959,7 +7959,7 @@ int Usage(void)
   fprintf(stderr,"sim_itype     #            | LOS type(%d)\n",SIM_ITYPE);
   fprintf(stderr,"sim_mult      value        | multiple scattering mode(%d)\n",SIM_MULT);
   fprintf(stderr,"sim_prnt      value        | NOPRNT flag(%d)\n",SIM_PRNT);
-  fprintf(stderr,"sim_wlen      name # unit  | wlen for pfunc(%s),wlen column#(%d),unit in nm(%.1f)\n",NONAME,0,1.0);
+  fprintf(stderr,"sim_phas_wlen name # unit  | wlen for pfunc(%s),wlen column#(%d),unit in nm(%.1f)\n",NONAME,0,1.0);
   fprintf(stderr,"sim_wlen_min  value unit   | min wlen(%.1f),unit in nm(%.1f)\n",SIM_WLEN_MIN,1.0);
   fprintf(stderr,"sim_wlen_max  value unit   | max wlen(%.1f),unit in nm(%.1f)\n",SIM_WLEN_MAX,1.0);
   fprintf(stderr,"sim_dmax      value        | max wlen difference in nm(%.1f)\n",SIM_DMAX);
