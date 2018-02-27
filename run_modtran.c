@@ -46,9 +46,9 @@
 #define SIM_MODTRAN                     'M'                     // MODTRAN band model
 #define SIM_SPEED                       'M'                     // Simulation speed
 #define	SIM_N_PHAS_WLEN			11			// #Wavelengths for phase function
-#define	SIM_MAXWLEN			15			// Max #wavelengths for phase function
+#define	SIM_MAX_PHASE_WLEN		15			// Max #wavelengths for phase function
 #define	SIM_N_PHAS_ANGL			50			// #Angles
-#define	SIM_MAXANGL			51			// Max #angles for phase function
+#define	SIM_MAX_PHASE_ANGL		51			// Max #angles for phase function
 #define	SIM_MAXNDIR			1000			// Max #directions
 #define	SIM_MAXDATA			50000			// #Data
 #define	SIM_MAXCONV			10000			// #Data
@@ -236,9 +236,11 @@ int MieInit(void);
 int MieTable(int n1,int n2);
 int MieCalc(void);
 int MixComp(void);
-int ReadMie(void);
+int ReadMie(int iaer);
+int SetMie1(int iaer);
+int SetMie2(int iaer);
 int MiePrintout(void);
-int upper_pfunc(double rh);
+int upper_pfunc(int iaer);
 int PrfInitMolecule(int imod);
 int PrfInitAerosol(int ihaz,int isea,int ivul,double vis);
 int PrfGround(void);
@@ -265,8 +267,7 @@ int ReadConfig(void);
 int PostConfig(void);
 int WaveSelect(double *w);
 int AnglSelect(double *a);
-int ReadComp(char *s,int size,int cr,int ci,int imin,int imax,double u,
-             double *wcom,double *rmod,double *lsgm,double **refr,double **refi);
+int ReadComp(int iaer,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi);
 int Read1A(char *s,int size,int cx,double ux,int (*func)(double*),double *x);
 int Read2A(char *s,int size,int cx,int cy,double ux,double uy,int (*func)(double*),double *x,double *y);
 int Read3A(char *s,int size,int cx,int cy,int cz,double ux,double uy,double uz,
@@ -301,6 +302,7 @@ double	*ssr_dsim			= NULL;			// Simulation data
 char    sim_modtran                     = SIM_MODTRAN;          // MODTRAN band model
 char    sim_speed                       = SIM_SPEED;            // Simulation speed
 int	sim_mode			= SIM_MODE_DSR_MODTRAN_BO; // Simulation mode
+int	sim_n_aers_wlen[4]		= {NODATA,NODATA,NODATA,NODATA}; // #Wavelengths for cext, etc.
 int	sim_n_phas_wlen			= SIM_N_PHAS_WLEN;	// #Wavelengths for phase function
 int	sim_n_phas_angl			= SIM_N_PHAS_ANGL;	// #Angles
 int	sim_n_dir			= NODATA;		// #Directions
@@ -345,13 +347,12 @@ double	sim_xsgm			= SIM_XSGM;		// X sigma
 double	sim_wsgm			= SIM_WSGM;		// X width in sigma
 double	sim_yuni			= SIM_YUNI;		// Y unit
 double	sim_dmax			= SIM_DMAX;		// Max wavelength difference in nm
-double	sim_phas_wlen[SIM_MAXWLEN]	=
+double	sim_phas_wlen[SIM_MAX_PHAS_WLEN]=
 {
   300.0, 337.1, 400.0,  488.0,  514.5, 550.0,
   632.8, 694.3, 860.0, 1060.0, 1300.0,
 };
-double	*sim_phas_wlen_um		= NULL;
-double	sim_phas_angl[SIM_MAXANGL]	=
+double	sim_phas_angl[SIM_MAX_PHAS_ANGL]=
 {
     0.0,   0.5,   1.0,   1.5,   2.0,   2.5,   3.0,   3.5,
     4.0,   4.5,   5.0,   6.0,   7.0,   8.0,   9.0,  10.0,
@@ -362,25 +363,12 @@ double	sim_phas_angl[SIM_MAXANGL]	=
   176.0, 180.0,
 };
 double	*sim_dir[4]			= {NULL,NULL,NULL,NULL};
-double	*sim_aer2_wlen			= NULL;
-double	*sim_aer3_wlen			= NULL;
-double	*sim_aer4_wlen			= NULL;
-double	*sim_aer2_wlen_um		= NULL;
-double	*sim_aer3_wlen_um		= NULL;
-double	*sim_aer4_wlen_um		= NULL;
-double	*sim_aer2_cext			= NULL;
-double	*sim_aer3_cext			= NULL;
-double	*sim_aer4_cext			= NULL;
-double	*sim_aer2_cabs			= NULL;
-double	*sim_aer3_cabs			= NULL;
-double	*sim_aer4_cabs			= NULL;
-double	*sim_aer2_asym			= NULL;
-double	*sim_aer3_asym			= NULL;
-double	*sim_aer4_asym			= NULL;
-double	*sim_aer1_phas			= NULL;
-double	*sim_aer2_phas			= NULL;
-double	*sim_aer3_phas			= NULL;
-double	*sim_aer4_phas			= NULL;
+double	*sim_aers_wlen_um[4]		= {NULL,NULL,NULL,NULL};
+double	*sim_aers_cext[4]		= {NULL,NULL,NULL,NULL};
+double	*sim_aers_cabs[4]		= {NULL,NULL,NULL,NULL};
+double	*sim_aers_asym[4]		= {NULL,NULL,NULL,NULL};
+double	*sim_phas_wlen_um		= NULL;
+double	*sim_aers_phas[4]		= {NULL,NULL,NULL,NULL};
 double	sim_wlen_min			= SIM_WLEN_MIN;		// Min wavelength in nm
 double	sim_wlen_max			= SIM_WLEN_MAX;		// Max wavelength in nm
 double	sim_th_sun			= SIM_TH_SUN;		// Solar zenith
@@ -463,9 +451,6 @@ int	mie_n_angl			= MIE_N_ANGL;		// #Angles
 int	mie_n_comp			= NODATA;		// #Components
 int	mie_n_step			= MIE_NSTP;		// Log10(R) #steps
 int	mie_n_size[MIE_MAXCOMP];				// #Size parameters
-int	mie_aer2_n_wlen			= NODATA;		// #Wavelengths (AER2)
-int	mie_aer3_n_wlen			= NODATA;		// #Wavelengths (AER3)
-int	mie_aer4_n_wlen			= NODATA;		// #Wavelengths (AER4)
 char	mie_size_func[MIE_MAXCOMP];				// Size distribution function
 char	mie_size_xtype[MIE_MAXCOMP];				// Size distribution X type
 char	mie_size_ytype[MIE_MAXCOMP];				// Size distribution Y type
@@ -505,9 +490,9 @@ double	*mie_angl_dif			= NULL;
 double	*mie_phs1			= NULL;
 double	*mie_phs2			= NULL;
 double	*mie_phas			= NULL;
-double	*mie_aer2_phas			= NULL;
-double	*mie_aer3_phas			= NULL;
-double	*mie_aer4_phas			= NULL;
+double	*mie_tropo_phas			= NULL;
+double	*mie_strat_phas			= NULL;
+double	*mie_meteo_phas			= NULL;
 double	*mie_refr_com[MIE_MAXCOMP];				// Refractive index (real)
 double	*mie_refi_com[MIE_MAXCOMP];				// Refractive index (imaginary)
 double	*mie_aext_com[MIE_MAXCOMP];				// Extinction coefficient
@@ -535,17 +520,12 @@ double	*mie_lrad_stp[MIE_MAXCOMP];				// Log10(R) step
 double	mie_rmin			= MIE_RMIN;		// R min in um
 double	mie_rmax			= MIE_RMAX;		// R max in um
 double	mie_wsgm			= MIE_WSGM;		// Log10(R) width in sigma
+char	mie_aers_cmp[4][MAXLINE]	= {"\0","\0","\0","\0"};// Parameters for ReadComp
 char	mie_out0[MAXLINE]		= MIE_OUT0;		// Output file 0
 char	mie_out1[MAXLINE]		= MIE_OUT1;		// Output file 1
 char	mie_out2[MAXLINE]		= MIE_OUT2;		// Output file 2
-char	mie_inp1[MAXLINE]		= "\0";			// Input file 1
-char	mie_aer2_inp1[MAXLINE]		= "\0";			// Input file 1
-char	mie_aer3_inp1[MAXLINE]		= "\0";			// Input file 1
-char	mie_aer4_inp1[MAXLINE]		= "\0";			// Input file 1
-char	mie_inp2[MAXLINE]		= "\0";			// Input file 2
-char	mie_aer2_inp2[MAXLINE]		= "\0";			// Input file 1
-char	mie_aer3_inp2[MAXLINE]		= "\0";			// Input file 1
-char	mie_aer4_inp2[MAXLINE]		= "\0";			// Input file 1
+char	mie_aers_inp1[4][MAXLINE]	= {"\0","\0","\0","\0"};// Input file 1
+char	mie_aers_inp2[4][MAXLINE]	= {"\0","\0","\0","\0"};// Input file 2
 // Parameters for T-matrix calculation
 int	tmx_ndis			= TMX_NDIS;		// Distribution#
 int	tmx_nang			= TMX_NANG;		// #Angles
@@ -833,25 +813,39 @@ int main(int argc,char **argv)
   if(cnt_hp) {Usage(); return 0;}
   if(Init() < 0) return -1;
 
-  if(mie_n_comp > 0)
-  {
-    if(MieInit() < 0) return -1;
-    if(MieTable(0,mie_n_comp-1) < 0) return -1;
-    if(MieCalc() < 0) return -1;
-    if(MixComp() < 0) return -1;
-    if(MiePrintout() < 0) return -1;
-  } else
-  if(mie_inp1[0] != '\0')
-  {
-    if(ReadMie() < 0) return -1;
-  } else
   if(sim_mode==SIM_MODE_DSR_CUSTOM_BO ||
      sim_mode==SIM_MODE_SSR_CUSTOM_SO ||
      sim_mode==SIM_MODE_SSR_CUSTOM_BO ||
      sim_mode==SIM_MODE_TRN_CUSTOM_BO)
   {
-    fprintf(stderr,"Error, mie_n_comp=%d\n",mie_n_comp);
-    return -1;
+    for(i=0; i<4; i++)
+    {
+      if(mie_aers_cmp[i][0] != '\0')
+      {
+        if((mie_n_comp=ReadComp(i,MIE_MAXCOMP,mie_wcom_com,mie_rmod_com,mie_lsgm_com,mie_refr_com,mie_refi_com)) <= 0) return -1;
+        if(MieInit() < 0) return -1;
+        if(MieTable(0,mie_n_comp-1) < 0) return -1;
+        if(MieCalc() < 0) return -1;
+        if(MixComp() < 0) return -1;
+        if(MiePrintout() < 0) return -1;
+        if(SetMie1(i) < 0) return -1;
+      } else
+      if(mie_aers_inp1[i][0] != '\0')
+      {
+        if(ReadMie(i) < 0) return -1;
+        if(SetMie1(i) < 0) return -1;
+      } else
+      if(i == 0)
+      {
+        fprintf(stderr,"Error, no custom aerosol parameters\n");
+        return -1;
+      }
+      else
+      {
+        if(upper_pfunc(i) < 0) return -1;
+      }
+      if(SetMie2(i) < 0) return -1;
+    }
   }
 
   if(sim_n_dir > 0)
@@ -1539,47 +1533,19 @@ int Init(void)
 
 void Finish(void)
 {
-  int n;
+  int i;
   int err = 0;
 
   // Deallocate memories
-  for(n=0; n<mie_n_comp; n++)
-  {
-    free(mie_refr_com[n]);
-    free(mie_refi_com[n]);
-    free(mie_aext_com[n]);
-    free(mie_asca_com[n]);
-    free(mie_asym_com[n]);
-    free(mie_phs1_com[n]);
-    free(mie_phs2_com[n]);
-    free(mie_phas_com[n]);
-    free(mie_aext_tab[n]);
-    free(mie_asca_tab[n]);
-    free(mie_phs1_tab[n]);
-    free(mie_phs2_tab[n]);
-    free(mie_lrad_min[n]);
-    free(mie_lrad_max[n]);
-    free(mie_lrad_stp[n]);
-  }
-  free(mie_wlen_um);
-  free(mie_aext);
-  free(mie_asca);
-  free(mie_asym);
-  free(mie_angl_rad);
-  free(mie_angl_sin);
-  free(mie_angl_cos);
-  free(mie_angl_dif);
-  free(mie_phs1);
-  free(mie_phs2);
-  free(mie_phas);
-  free(mie_aer2_phas);
-  free(mie_aer3_phas);
-  free(mie_aer4_phas);
   free(sim_phas_wlen_um);
-  free(sim_phas);
-  free(sim_aer2_phas);
-  free(sim_aer3_phas);
-  free(sim_aer4_phas);
+  for(i=0; i<4; i++)
+  {
+    free(sim_aers_wlen_um[i]);
+    free(sim_aers_cext[i]);
+    free(sim_aers_cabs[i]);
+    free(sim_aers_asym[i]);
+    free(sim_aers_phas[i]);
+  }
   if(sim_n_dir > 0)
   {
     free(sim_dir[0]);
@@ -1679,29 +1645,24 @@ int MieInit(void)
   {
     mie_wlen_um[i] = mie_wlen[i]*1.0e-3;
   }
-  sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
-  if(sim_phas_wlen_um == NULL)
-  {
-    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
-    return -1;
-  }
-  for(i=0; i<sim_n_phas_wlen; i++)
-  {
-    sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
-  }
   mie_aext = (double *)malloc(mie_n_wlen*sizeof(double));
   mie_asca = (double *)malloc(mie_n_wlen*sizeof(double));
   mie_asym = (double *)malloc(mie_n_wlen*sizeof(double));
   mie_phs1 = (double *)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
   mie_phs2 = (double *)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
   mie_phas = (double *)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-  sim_phas = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
   if(mie_aext==NULL || mie_asca==NULL || mie_asym==NULL ||
-     mie_phs1==NULL || mie_phs2==NULL || mie_phas==NULL || sim_phas==NULL)
+     mie_phs1==NULL || mie_phs2==NULL || mie_phas==NULL)
   {
     fprintf(stderr,"%s: failed in allocating memory\n",fnam);
     return -1;
   }
+
+
+
+
+
+
   for(n=0; n<mie_n_comp; n++)
   {
     if(mie_size_func[n] == MIE_FUNC_FILE)
@@ -1751,8 +1712,6 @@ int MieInit(void)
   {
     mie_angl_dif[j] = PI*fabs(mie_angl_rad[j]-mie_angl_rad[j-1]);
   }
-
-  if(upper_pfunc(upp_rh) < 0) return -1;
 
   return 0;
 }
@@ -2424,16 +2383,10 @@ int MixComp(void)
     }
   }
 
-  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
-              sim_phas_wlen,sim_phas_angl,sim_phas,sim_n_phas_wlen,sim_n_phas_angl,0) < 0)
-  {
-    return -1;
-  }
-
   return 0;
 }
 
-int ReadMie(void)
+int ReadMie(int iaer)
 {
   int i,j,k;
   int err;
@@ -2461,9 +2414,9 @@ int ReadMie(void)
   err = 0;
   do
   {
-    if((fp=fopen(mie_inp1,"r")) == NULL)
+    if((fp=fopen(mie_aers_inp1[iaer],"r")) == NULL)
     {
-      fprintf(stderr,"%s: cannot open %s\n",fnam,mie_inp1);
+      fprintf(stderr,"%s: cannot open %s\n",fnam,mie_aers_inp1[iaer]);
       err = 1;
       break;
     }
@@ -2472,7 +2425,7 @@ int ReadMie(void)
     {
       if(sscanf(line,"%s%s%s%s%s",str[0],str[1],str[2],str[3],str[4]) != 5)
       {
-        fprintf(stderr,"%s: read error (%s) >>> %s\n",fnam,mie_inp1,line);
+        fprintf(stderr,"%s: read error (%s) >>> %s\n",fnam,mie_aers_inp1[iaer],line);
         err = 1;
         break;
       }
@@ -2482,7 +2435,7 @@ int ReadMie(void)
         v[j] = strtod(str[j],&p);
         if(errno==ERANGE || *p!='\0')
         {
-          fprintf(stderr,"%s: convert error (%s) >>> %s\n",fnam,mie_inp1,line);
+          fprintf(stderr,"%s: convert error (%s) >>> %s\n",fnam,mie_aers_inp1[iaer],line);
           err = 1;
           break;
         }
@@ -2490,7 +2443,7 @@ int ReadMie(void)
       if(err) break;
       if(i >= MIE_MAXDATA)
       {
-        fprintf(stderr,"%s: warning, #data exceed the limit %d (%s)\n",fnam,i,mie_inp1);
+        fprintf(stderr,"%s: warning, #data exceed the limit %d (%s)\n",fnam,i,mie_aers_inp1[iaer]);
         break;
       }
       mie_wlen[i] = v[0];
@@ -2507,11 +2460,11 @@ int ReadMie(void)
     mie_n_wlen = i;
     if(cnt_vb > 1)
     {
-      fprintf(stderr,"%s: %d data have been read (%s)\n",fnam,mie_n_wlen,mie_inp1);
+      fprintf(stderr,"%s: %d data have been read (%s)\n",fnam,mie_n_wlen,mie_aers_inp1[iaer]);
     }
     if(mie_n_wlen < 1)
     {
-      fprintf(stderr,"%s: error, mie_n_wlen=%d (%s)\n",fnam,mie_n_wlen,mie_inp1);
+      fprintf(stderr,"%s: error, mie_n_wlen=%d (%s)\n",fnam,mie_n_wlen,mie_aers_inp1[iaer]);
       err = 1;
       break;
     }
@@ -2558,9 +2511,9 @@ int ReadMie(void)
       }
     }
     // read phase function data
-    if((fp=fopen(mie_inp2,"r")) == NULL)
+    if((fp=fopen(mie_aers_inp2[iaer],"r")) == NULL)
     {
-      fprintf(stderr,"%s: cannot open %s\n",fnam,mie_inp2);
+      fprintf(stderr,"%s: cannot open %s\n",fnam,mie_aers_inp2[iaer]);
       err = 1;
       break;
     }
@@ -2569,7 +2522,7 @@ int ReadMie(void)
     {
       if(sscanf(line,"%s%s%s%s%s",str[0],str[1],str[2],str[3],str[4]) != 5)
       {
-        fprintf(stderr,"%s: read error (%s) >>> %s\n",fnam,mie_inp2,line);
+        fprintf(stderr,"%s: read error (%s) >>> %s\n",fnam,mie_aers_inp2[iaer],line);
         err = 1;
         break;
       }
@@ -2579,7 +2532,7 @@ int ReadMie(void)
         v[j] = strtod(str[j],&p);
         if(errno==ERANGE || *p!='\0')
         {
-          fprintf(stderr,"%s: convert error (%s) >>> %s\n",fnam,mie_inp2,line);
+          fprintf(stderr,"%s: convert error (%s) >>> %s\n",fnam,mie_aers_inp2[iaer],line);
           err = 1;
           break;
         }
@@ -2587,7 +2540,7 @@ int ReadMie(void)
       if(err) break;
       if(i >= MIE_MAXDATA)
       {
-        fprintf(stderr,"%s: warning, #data exceed the limit %d (%s)\n",fnam,i,mie_inp2);
+        fprintf(stderr,"%s: warning, #data exceed the limit %d (%s)\n",fnam,i,mie_aers_inp2[iaer]);
         break;
       }
       if(v[0] != mie_wlen[0])
@@ -2609,7 +2562,7 @@ int ReadMie(void)
     mie_n_angl = i;
     if(mie_n_angl < 1)
     {
-      fprintf(stderr,"%s: error, mie_n_angl=%d (%s)\n",fnam,mie_n_angl,mie_inp2);
+      fprintf(stderr,"%s: error, mie_n_angl=%d (%s)\n",fnam,mie_n_angl,mie_aers_inp2[iaer]);
       err = 1;
       break;
     }
@@ -2634,13 +2587,13 @@ int ReadMie(void)
       {
         if(fgets(line,MAXLINE,fp) == NULL)
         {
-          fprintf(stderr,"%s: read error (%s) >>> i=%d, j=%d\n",fnam,mie_inp2,i,j);
+          fprintf(stderr,"%s: read error (%s) >>> i=%d, j=%d\n",fnam,mie_aers_inp2[iaer],i,j);
           err = 1;
           break;
         }
         if(sscanf(line,"%s%s%s%s%s",str[0],str[1],str[2],str[3],str[4]) != 5)
         {
-          fprintf(stderr,"%s: read error (%s) >>> %s\n",fnam,mie_inp2,line);
+          fprintf(stderr,"%s: read error (%s) >>> %s\n",fnam,mie_aers_inp2[iaer],line);
           err = 1;
           break;
         }
@@ -2650,7 +2603,7 @@ int ReadMie(void)
           v[k] = strtod(str[k],&p);
           if(errno==ERANGE || *p!='\0')
           {
-            fprintf(stderr,"%s: convert error (%s) >>> %s\n",fnam,mie_inp2,line);
+            fprintf(stderr,"%s: convert error (%s) >>> %s\n",fnam,mie_aers_inp2[iaer],line);
             err = 1;
             break;
           }
@@ -2675,7 +2628,7 @@ int ReadMie(void)
     }
     if(fgets(line,MAXLINE,fp) != NULL)
     {
-      fprintf(stderr,"%s: error, extra data detected (%s)\n",fnam,mie_inp2);
+      fprintf(stderr,"%s: error, extra data detected (%s)\n",fnam,mie_aers_inp2[iaer]);
       err = 1;
     }
     fclose(fp);
@@ -2721,27 +2674,6 @@ int ReadMie(void)
   {
     mie_wlen_um[i] = mie_wlen[i]*1.0e-3;
   }
-  sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
-  if(sim_phas_wlen_um == NULL)
-  {
-    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
-    return -1;
-  }
-  for(i=0; i<sim_n_phas_wlen; i++)
-  {
-    sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
-  }
-  sim_phas = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  if(sim_phas == NULL)
-  {
-    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
-    return -1;
-  }
-  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
-              sim_phas_wlen,sim_phas_angl,sim_phas,sim_n_phas_wlen,sim_n_phas_angl,0) < 0)
-  {
-    return -1;
-  }
 
   mie_angl_rad = (double *)malloc(mie_n_angl*sizeof(double));
   mie_angl_sin = (double *)malloc(mie_n_angl*sizeof(double));
@@ -2763,8 +2695,6 @@ int ReadMie(void)
     mie_angl_dif[j] = PI*fabs(mie_angl_rad[j]-mie_angl_rad[j-1]);
   }
 
-  if(upper_pfunc(upp_rh) < 0) return -1;
-
   if(cnt_vb > 1)
   {
     for(i=0; i<mie_n_wlen; i++)
@@ -2782,6 +2712,158 @@ int ReadMie(void)
       }
     }
   }
+
+  return 0;
+}
+
+int SetMie1(int iaer)
+{
+  char fnam[] = "SetMie1";
+
+  if(iaer<0 || iaer>3)
+  {
+    fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
+    return -1;
+  }
+  sim_n_aers_wlen[iaer] = mie_n_wlen;
+  sim_aers_wlen_um[iaer] = (double *)malloc(sim_n_aers_wlen[iaer]*sizeof(double));
+  sim_aers_cext[iaer] = (double *)malloc(sim_n_aers_wlen[iaer]*sizeof(double));
+  sim_aers_cabs[iaer] = (double *)malloc(sim_n_aers_wlen[iaer]*sizeof(double));
+  sim_aers_asym[iaer] = (double *)malloc(sim_n_aers_wlen[iaer]*sizeof(double));
+  if(sim_aers_wlen_um[iaer]==NULL || sim_aers_cext[iaer]==NULL ||
+     sim_aers_cabs[iaer]==NULL || sim_aers_asym[iaer]==NULL)
+  {
+    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
+    return -1;
+  }
+  for(i=0; i<sim_n_aers_wlen[iaer]; i++)
+  {
+    sim_aers_wlen_um[i] = mie_wlen_um[i];
+    sim_aers_cext[i] = mie_aext[i]/mie_aext[mie_iref];
+    sim_aers_cabs[i] = (mie_aext[i]-mie_asca[i])/mie_aext[mie_iref];
+    sim_aers_asym[i] = mie_asym[i];
+  }
+
+  return 0;
+}
+
+int SetMie2(int iaer)
+{
+  int n;
+  char fnam[] = "SetMie2";
+
+  if(iaer<0 || iaer>3)
+  {
+    fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
+    return -1;
+  }
+  sim_n_aers_wlen[iaer] = mie_n_wlen;
+  sim_aers_wlen_um[iaer] = mie_wlen_um;
+  sim_aers_aext[iaer] = mie_aext;
+  sim_aers_asca[iaer] = mie_asca;
+  sim_aers_asym[iaer] = mie_asym;
+
+
+
+  sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
+  if(sim_phas_wlen_um == NULL)
+  {
+    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
+    return -1;
+  }
+  for(i=0; i<sim_n_phas_wlen; i++)
+  {
+    sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
+  }
+
+  sim_aers_phas[iaer] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
+  if(sim_aers_phas[iaer]==NULL)
+  {
+  }
+
+
+  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
+              sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,0) < 0)
+  {
+    return -1;
+  }
+
+
+
+
+
+
+
+  sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
+  if(sim_phas_wlen_um == NULL)
+  {
+    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
+    return -1;
+  }
+  for(i=0; i<sim_n_phas_wlen; i++)
+  {
+    sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
+  }
+  sim_aers_phas[iaer] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
+  if(sim_aers_phas[iaer] == NULL)
+  {
+    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
+    return -1;
+  }
+  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
+              sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,0) < 0)
+  {
+    return -1;
+  }
+
+
+
+  sim_aers_phas[iaer] = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
+  sim_aers_phas[iaer] = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
+  sim_aers_phas[iaer] = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
+
+
+
+  Interp2D(mie_wlen,mie_angl,mie_tropo_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,1);
+  Interp2D(mie_wlen,mie_angl,mie_strat_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,0);
+  Interp2D(mie_wlen,mie_angl,mie_meteo_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,0);
+
+
+
+
+
+  for(n=0; n<mie_n_comp; n++)
+  {
+    free(mie_refr_com[n]);
+    free(mie_refi_com[n]);
+    free(mie_aext_com[n]);
+    free(mie_asca_com[n]);
+    free(mie_asym_com[n]);
+    free(mie_phs1_com[n]);
+    free(mie_phs2_com[n]);
+    free(mie_phas_com[n]);
+    free(mie_aext_tab[n]);
+    free(mie_asca_tab[n]);
+    free(mie_phs1_tab[n]);
+    free(mie_phs2_tab[n]);
+    free(mie_lrad_min[n]);
+    free(mie_lrad_max[n]);
+    free(mie_lrad_stp[n]);
+  }
+  free(mie_wlen_um);
+  free(mie_aext);
+  free(mie_asca);
+  free(mie_asym);
+  free(mie_angl_rad);
+  free(mie_angl_sin);
+  free(mie_angl_cos);
+  free(mie_angl_dif);
+  free(mie_phs1);
+  free(mie_phs2);
+  free(mie_phas);
+  free(mie_tropo_phas);
+  free(mie_strat_phas);
+  free(mie_meteo_phas);
 
   return 0;
 }
@@ -2846,7 +2928,7 @@ int MiePrintout(void)
   return 0;
 }
 
-int upper_pfunc(double rh)
+int upper_pfunc(int iaer)
 {
   int i,j,k;
   int i_1,i_2;
@@ -2854,25 +2936,21 @@ int upper_pfunc(double rh)
   double *tropo_phas_tmp1 = NULL;
   double *tropo_phas_tmp2 = NULL;
 
-  mie_aer2_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-  mie_aer3_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-  mie_aer4_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-  sim_aer2_phas = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  sim_aer3_phas = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  sim_aer4_phas = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  if(mie_aer2_phas==NULL || mie_aer3_phas==NULL || mie_aer4_phas==NULL ||
-     sim_aer2_phas==NULL || sim_aer3_phas==NULL || sim_aer4_phas==NULL)
+  mie_tropo_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
+  mie_strat_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
+  mie_meteo_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
+  if(mie_tropo_phas==NULL || mie_strat_phas==NULL || mie_meteo_phas==NULL)
   {
     fprintf(stderr,"upper_pfunc: error in allocating memory\n");
     return -1;
   }
 
-  Interp2D(upp_wlen,upp_angl,upp_strat_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_aer3_phas,mie_n_wlen,mie_n_angl,1);
-  Interp2D(upp_wlen,upp_angl,upp_meteo_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_aer4_phas,mie_n_wlen,mie_n_angl,0);
+  Interp2D(upp_wlen,upp_angl,upp_strat_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_strat_phas,mie_n_wlen,mie_n_angl,1);
+  Interp2D(upp_wlen,upp_angl,upp_meteo_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_meteo_phas,mie_n_wlen,mie_n_angl,0);
   i_1 = i_2 = -1;
   for(i=UPP_N_RHUM-1; i>=0; i--)
   {
-    if(upp_rhum[i] <= rh)
+    if(upp_rhum[i] <= upp_rh)
     {
       i_1 = i;
       break;
@@ -2881,7 +2959,7 @@ int upper_pfunc(double rh)
   if(i_1 < 0) i_1 = 0;
   for(i=0; i<UPP_N_RHUM; i++)
   {
-    if(upp_rhum[i] >= rh)
+    if(upp_rhum[i] >= upp_rh)
     {
       i_2 = i;
       break;
@@ -2899,7 +2977,7 @@ int upper_pfunc(double rh)
       for(j=0; j<mie_n_angl; j++)
       {
         k = mie_n_angl*i+j;
-        mie_aer2_phas[k] = INTERP(rh,upp_rhum[i_1],upp_rhum[i_2],tropo_phas_tmp1[k],tropo_phas_tmp2[k]);
+        mie_tropo_phas[k] = INTERP(upp_rh,upp_rhum[i_1],upp_rhum[i_2],tropo_phas_tmp1[k],tropo_phas_tmp2[k]);
       }
     }
     free(tropo_phas_tmp1);
@@ -2907,7 +2985,7 @@ int upper_pfunc(double rh)
   }
   else
   {
-    Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_aer2_phas,mie_n_wlen,mie_n_angl,0);
+    Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_tropo_phas,mie_n_wlen,mie_n_angl,0);
   }
 
   for(i=0; i<mie_n_wlen; i++)
@@ -2916,22 +2994,18 @@ int upper_pfunc(double rh)
     for(j=1; j<mie_n_angl; j++)
     {
       k = mie_n_angl*i+j;
-      p1 += (mie_aer2_phas[k-1]*mie_angl_sin[j-1]+mie_aer2_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
-      p2 += (mie_aer3_phas[k-1]*mie_angl_sin[j-1]+mie_aer3_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
-      p3 += (mie_aer4_phas[k-1]*mie_angl_sin[j-1]+mie_aer4_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
+      p1 += (mie_tropo_phas[k-1]*mie_angl_sin[j-1]+mie_tropo_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
+      p2 += (mie_strat_phas[k-1]*mie_angl_sin[j-1]+mie_strat_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
+      p3 += (mie_meteo_phas[k-1]*mie_angl_sin[j-1]+mie_meteo_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
     }
     for(j=0; j<mie_n_angl; j++)
     {
       k = mie_n_angl*i+j;
-      mie_aer2_phas[k] /= p1;
-      mie_aer3_phas[k] /= p2;
-      mie_aer4_phas[k] /= p3;
+      mie_tropo_phas[k] /= p1;
+      mie_strat_phas[k] /= p2;
+      mie_meteo_phas[k] /= p3;
     }
   }
-
-  Interp2D(mie_wlen,mie_angl,mie_aer2_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aer2_phas,sim_n_phas_wlen,sim_n_phas_angl,1);
-  Interp2D(mie_wlen,mie_angl,mie_aer3_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aer3_phas,sim_n_phas_wlen,sim_n_phas_angl,0);
-  Interp2D(mie_wlen,mie_angl,mie_aer4_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aer4_phas,sim_n_phas_wlen,sim_n_phas_angl,0);
 
   return 0;
 }
@@ -3920,8 +3994,6 @@ int ReadConfig(void)
 {
   int n,nc;
   int num;
-  int cx,cy;
-  int imin,imax;
   int idx;
   int err;
   int ntmp;
@@ -4487,7 +4559,7 @@ int ReadConfig(void)
       {
         if(strcmp(str[1],NONAME) != 0)
         {
-          if((sim_n_phas_wlen=Read1A(str[1],SIM_MAXWLEN,num,uni,NULL,sim_phas_wlen)) < 1)
+          if((sim_n_phas_wlen=Read1A(str[1],SIM_MAX_PHAS_WLEN,num,uni,NULL,sim_phas_wlen)) < 1)
           {
             err = 1;
             break;
@@ -5654,87 +5726,99 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_fcmp") == 0)
+    if(strcasecmp(str[0],"mie_cmp1") == 0)
     {
-      cx = MIE_REAL_NUM;
-      cy = MIE_IMAG_NUM;
-      uni = 1.0;
-      imin = MIE_IMIN;
-      imax = MIE_IMAX;
-      if(n > 2)
+      if(n > 1) // str[1] must be the file name
       {
-        errno = 0;
-        cx = strtol(str[2],&p,10);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 3)
-      {
-        errno = 0;
-        cy = strtol(str[3],&p,10);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 4)
-      {
-        errno = 0;
-        uni = strtod(str[4],&p);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 5)
-      {
-        errno = 0;
-        imin = strtol(str[5],&p,10);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 6)
-      {
-        errno = 0;
-        imax = strtol(str[6],&p,10);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if((mie_n_comp=ReadComp(str[1],MIE_MAXCOMP,cx,cy,imin,imax,uni,
-                              mie_wcom_com,mie_rmod_com,mie_lsgm_com,mie_refr_com,mie_refi_com)) < 0)
-      {
-        err = 1;
-        break;
+        snprintf(mie_aers_cmp[0],MAXLINE,"%s",temp);
       }
       if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
       {
-        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s %4d %4d %13.6e %4d %4d\n",str[0],str[1],
-                                               cx,cy,uni,imin,imax);
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_finp") == 0)
+    if(strcasecmp(str[0],"mie_cmp2") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_cmp[1],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_cmp3") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_cmp[2],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_cmp4") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_cmp[3],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_inp1") == 0)
     {
       if(n > 1)
       {
-        snprintf(mie_inp1,MAXLINE,"%s1.dat",str[1]);
-        snprintf(mie_inp2,MAXLINE,"%s2.dat",str[1]);
+        snprintf(mie_aers_inp1[0],MAXLINE,"%s1.dat",str[1]);
+        snprintf(mie_aers_inp2[0],MAXLINE,"%s2.dat",str[1]);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],str[1]);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_inp2") == 0)
+    {
+      if(n > 1)
+      {
+        snprintf(mie_aers_inp1[1],MAXLINE,"%s1.dat",str[1]);
+        snprintf(mie_aers_inp2[1],MAXLINE,"%s2.dat",str[1]);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],str[1]);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_inp3") == 0)
+    {
+      if(n > 1)
+      {
+        snprintf(mie_aers_inp1[2],MAXLINE,"%s1.dat",str[1]);
+        snprintf(mie_aers_inp2[2],MAXLINE,"%s2.dat",str[1]);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],str[1]);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_inp4") == 0)
+    {
+      if(n > 1)
+      {
+        snprintf(mie_aers_inp1[3],MAXLINE,"%s1.dat",str[1]);
+        snprintf(mie_aers_inp2[3],MAXLINE,"%s2.dat",str[1]);
       }
       if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
       {
@@ -5959,34 +6043,104 @@ int AnglSelect(double *a)
   }
 }
 
-int ReadComp(char *s,int size,int cr,int ci,int imin,int imax,double u,
-             double *wcom,double *rmod,double *lsgm,double **refr,double **refi)
+int ReadComp(int iaer,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi)
 {
   int i,j,n;
   int nc,ns;
   int n_comp = 0;
+  int cr = MIE_REAL_NUM;
+  int ci = MIE_IMAG_NUM;
+  int imin = MIE_IMIN;
+  int imax = MIE_IMAX;
   int err;
   int flag;
+  double u = 1.0;
   double v;
   double *x,*y;
   char line[MAXLINE];
   char str[MAXITEM][MAXLINE];
   char fnam[] = "ReadComp";
-  char *p;
+  char *s,*p;
   FILE *fp;
 
-  if(strcmp(s,"")!=0 && strcmp(s,NONAME)!=0)
+  s = mie_aers_cmp[iaer];
+  for(ns=nc=0,p=s; ns<MAXITEM; ns++,p+=nc)
   {
-    if(strcmp(s,"stdin") == 0)
+    if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
+  }
+  if(strcasecmp(str[0],"mie_cmp") != 0)
+  {
+    fprintf(stderr,"%s: error in input >>> %s\n",fnam,s);
+    return -1;
+  } else
+  if(ns < 2)
+  {
+    fprintf(stderr,"%s: error, ns=%d (%s)\n",fnam,ns,s);
+    return -1;
+  }
+  if(ns > 2)
+  {
+    errno = 0;
+    cr = strtol(str[2],&p,10);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+  if(ns > 3)
+  {
+    errno = 0;
+    ci = strtol(str[3],&p,10);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+  if(ns > 4)
+  {
+    errno = 0;
+    u = strtod(str[4],&p);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+  if(ns > 5)
+  {
+    errno = 0;
+    imin = strtol(str[5],&p,10);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+  if(ns > 6)
+  {
+    errno = 0;
+    imax = strtol(str[6],&p,10);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+
+  if(strcmp(str[1],"")!=0 && strcmp(str[1],NONAME)!=0)
+  {
+    if(strcmp(str[1],"stdin") == 0)
     {
       fp = stdin;
       flag = 0;
     }
     else
     {
-      if((fp=fopen(s,"r")) == NULL)
+      if((fp=fopen(str[1],"r")) == NULL)
       {
-        fprintf(stderr,"%s: cannot open %s\n",fnam,s);
+        fprintf(stderr,"%s: cannot open %s\n",fnam,str[1]);
         return -1;
       }
       flag = 1;
@@ -8005,13 +8159,22 @@ int Usage(void)
   fprintf(stderr,"mie_wsgm      value        | Log10(R) sigma(%.1f)\n",MIE_WSGM);
   fprintf(stderr,"mie_rmin      value        | min R in um(%.1f)\n",MIE_RMIN);
   fprintf(stderr,"mie_rmax      value        | max R in um(%.1f)\n",MIE_RMAX);
-  fprintf(stderr,"mie_fcmp    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
+  fprintf(stderr,"mie_cmp1    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
                                                "min line#(%d),max line#(10^%.0f)\n",
                                                NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
-  fprintf(stderr,"mie_finp      name         | file name(%s)\n",NONAME);
-  fprintf(stderr,"mie_aer2_finp name         | file name(%s)\n",NONAME);
-  fprintf(stderr,"mie_aer3_finp name         | file name(%s)\n",NONAME);
-  fprintf(stderr,"mie_aer4_finp name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_cmp2    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
+                                               "min line#(%d),max line#(10^%.0f)\n",
+                                               NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
+  fprintf(stderr,"mie_cmp3    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
+                                               "min line#(%d),max line#(10^%.0f)\n",
+                                               NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
+  fprintf(stderr,"mie_cmp4    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
+                                               "min line#(%d),max line#(10^%.0f)\n",
+                                               NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
+  fprintf(stderr,"mie_inp1      name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_inp2      name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_inp3      name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_inp4      name         | file name(%s)\n",NONAME);
   fprintf(stderr,"upp_rh        value        | RH of upper atmosphere in %%(%.1f)\n",UPP_RH);
   fprintf(stderr,"cld_thik      value        | Cloud thickness(%.1f)\n",CLD_THIK);
   fprintf(stderr,"cld_alt       value        | Cloud altitude(%.1f)\n",CLD_ALT);
