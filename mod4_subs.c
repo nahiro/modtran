@@ -515,7 +515,7 @@ int WriteCard3_V4(FILE *fp,int mode,double *par)
       if(mode==SIM_MODE_SSR_CUSTOM_SO  || mode==SIM_MODE_SSR_CUSTOM_BO)
       {
         // CARD 3B1
-        fprintf(fp,"%5d%5d\n",sim_n_angl,sim_n_wlen);
+        fprintf(fp,"%5d%5d\n",sim_n_phas_angl,sim_n_phas_wlen);
         // CARD 3C
         WriteCard3C_V4(fp);
       }
@@ -541,89 +541,89 @@ int WriteCard3C_V4(FILE *fp)
   int i,j,k;
 
   // CARD 3C1
-  for(i=0; i<sim_n_angl; i++)
+  for(i=0; i<sim_n_phas_angl; i++)
   {
-    fprintf(fp,"%10.5f%s",sim_angl[i],i==sim_n_angl-1?"\n":i%8==7?"\n":"");
+    fprintf(fp,"%10.5f%s",sim_phas_angl[i],i==sim_n_phas_angl-1?"\n":i%8==7?"\n":"");
   }
   // CARD 3C2
-  for(i=0; i<sim_n_wlen; i++)
+  for(i=0; i<sim_n_phas_wlen; i++)
   {
-    fprintf(fp,"%10.6f%s",sim_phas_wlen_um[i],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+    fprintf(fp,"%10.6f%s",sim_phas_wlen_um[i],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
   }
   #ifdef OLDMODE
   // CARD 3C3
-  for(j=0; j<sim_n_angl; j++)
+  for(j=0; j<sim_n_phas_angl; j++)
   {
-    for(i=0; i<sim_n_wlen; i++)
+    for(i=0; i<sim_n_phas_wlen; i++)
     {
-      k = sim_n_angl*i+j;
-      cprintf(fp," %9.3e%s",sim_phas[k],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+      k = sim_n_phas_angl*i+j;
+      cprintf(fp," %9.3e%s",sim_aer1_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C4
-  for(j=0; j<sim_n_angl; j++)
+  for(j=0; j<sim_n_phas_angl; j++)
   {
-    for(i=0; i<sim_n_wlen; i++)
+    for(i=0; i<sim_n_phas_wlen; i++)
     {
-      k = sim_n_angl*i+j;
-      fprintf(fp,"%10.3e%s",sim_tropo_phas[k],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+      k = sim_n_phas_angl*i+j;
+      fprintf(fp,"%10.3e%s",sim_aer2_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C5
-  for(j=0; j<sim_n_angl; j++)
+  for(j=0; j<sim_n_phas_angl; j++)
   {
-    for(i=0; i<sim_n_wlen; i++)
+    for(i=0; i<sim_n_phas_wlen; i++)
     {
-      k = sim_n_angl*i+j;
-      fprintf(fp,"%10.3e%s",sim_strat_phas[k],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+      k = sim_n_phas_angl*i+j;
+      fprintf(fp,"%10.3e%s",sim_aer3_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C6
-  for(j=0; j<sim_n_angl; j++)
+  for(j=0; j<sim_n_phas_angl; j++)
   {
-    for(i=0; i<sim_n_wlen; i++)
+    for(i=0; i<sim_n_phas_wlen; i++)
     {
-      k = sim_n_angl*i+j;
-      fprintf(fp,"%10.3e%s",sim_meteo_phas[k],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+      k = sim_n_phas_angl*i+j;
+      fprintf(fp,"%10.3e%s",sim_aer4_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   #else
   // To increase the precision, driver.f line 1192 must be modified as following:
   // READ(IRD,'(8E15.9)')                      &
   // CARD 3C3
-  for(j=0; j<sim_n_angl; j++)
+  for(j=0; j<sim_n_phas_angl; j++)
   {
-    for(i=0; i<sim_n_wlen; i++)
+    for(i=0; i<sim_n_phas_wlen; i++)
     {
-      k = sim_n_angl*i+j;
-      cprintf(fp,"%15.9e%s",sim_phas[k],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+      k = sim_n_phas_angl*i+j;
+      cprintf(fp,"%15.9e%s",sim_aer1_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C4
-  for(j=0; j<sim_n_angl; j++)
+  for(j=0; j<sim_n_phas_angl; j++)
   {
-    for(i=0; i<sim_n_wlen; i++)
+    for(i=0; i<sim_n_phas_wlen; i++)
     {
-      k = sim_n_angl*i+j;
-      fprintf(fp,"%15.9e%s",sim_tropo_phas[k],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+      k = sim_n_phas_angl*i+j;
+      fprintf(fp,"%15.9e%s",sim_aer2_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C5
-  for(j=0; j<sim_n_angl; j++)
+  for(j=0; j<sim_n_phas_angl; j++)
   {
-    for(i=0; i<sim_n_wlen; i++)
+    for(i=0; i<sim_n_phas_wlen; i++)
     {
-      k = sim_n_angl*i+j;
-      fprintf(fp,"%15.9e%s",sim_strat_phas[k],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+      k = sim_n_phas_angl*i+j;
+      fprintf(fp,"%15.9e%s",sim_aer3_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C6
-  for(j=0; j<sim_n_angl; j++)
+  for(j=0; j<sim_n_phas_angl; j++)
   {
-    for(i=0; i<sim_n_wlen; i++)
+    for(i=0; i<sim_n_phas_wlen; i++)
     {
-      k = sim_n_angl*i+j;
-      fprintf(fp,"%15.9e%s",sim_meteo_phas[k],i==sim_n_wlen-1?"\n":i%8==7?"\n":"");
+      k = sim_n_phas_angl*i+j;
+      fprintf(fp,"%15.9e%s",sim_aer4_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   #endif
