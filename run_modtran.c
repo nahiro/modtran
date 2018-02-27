@@ -361,15 +361,6 @@ double	sim_angl[SIM_N_ANGL] =
   176.0, 180.0,
 };
 double	*sim_dir[4]			= {NULL,NULL,NULL,NULL};
-double	*sim_tropo_aext			= NULL;
-double	*sim_strat_aext			= NULL;
-double	*sim_meteo_aext			= NULL;
-double	*sim_tropo_omeg			= NULL;
-double	*sim_strat_omeg			= NULL;
-double	*sim_meteo_omeg			= NULL;
-double	*sim_tropo_asym			= NULL;
-double	*sim_strat_asym			= NULL;
-double	*sim_meteo_asym			= NULL;
 double	*sim_phas			= NULL;
 double	*sim_tropo_phas			= NULL;
 double	*sim_strat_phas			= NULL;
@@ -456,6 +447,9 @@ int	mie_n_angl			= MIE_N_ANGL;		// #Angles
 int	mie_n_comp			= NODATA;		// #Components
 int	mie_n_step			= MIE_NSTP;		// Log10(R) #steps
 int	mie_n_size[MIE_MAXCOMP];				// #Size parameters
+int	mie_tropo_n_wlen		= NODATA;		// #Wavelengths (tropo)
+int	mie_strat_n_wlen		= NODATA;		// #Wavelengths (strat)
+int	mie_meteo_n_wlen		= NODATA;		// #Wavelengths (meteo)
 char	mie_size_func[MIE_MAXCOMP];				// Size distribution function
 char	mie_size_xtype[MIE_MAXCOMP];				// Size distribution X type
 char	mie_size_ytype[MIE_MAXCOMP];				// Size distribution Y type
@@ -472,6 +466,21 @@ double	*mie_wlen_um			= NULL;
 double	*mie_aext			= NULL;
 double	*mie_asca			= NULL;
 double	*mie_asym			= NULL;
+double	*mie_tropo_wlen			= NULL;
+double	*mie_strat_wlen			= NULL;
+double	*mie_meteo_wlen			= NULL;
+double	*mie_tropo_wlen_um		= NULL;
+double	*mie_strat_wlen_um		= NULL;
+double	*mie_meteo_wlen_um		= NULL;
+double	*mie_tropo_cext			= NULL;
+double	*mie_strat_cext			= NULL;
+double	*mie_meteo_cext			= NULL;
+double	*mie_tropo_cabs			= NULL;
+double	*mie_strat_cabs			= NULL;
+double	*mie_meteo_cabs			= NULL;
+double	*mie_tropo_asym			= NULL;
+double	*mie_strat_asym			= NULL;
+double	*mie_meteo_asym			= NULL;
 double	mie_angl_min			= MIE_ANGL_MIN;		// Min angle in degree
 double	mie_angl_max			= MIE_ANGL_MAX;		// Max angle in degree
 double	mie_angl[MIE_MAXDATA]		=
@@ -559,7 +568,7 @@ double	upp_angl[UPP_N_ANGL] =
   175.0, 180.0,
 };
 double	upp_rhum[UPP_N_RHUM] = {0.0, 70.0, 80.0, 99.0};
-double	upp_rh = UPP_RH;
+double	upp_rh				= UPP_RH;
 double	upp_tropo_phas[UPP_N_RHUM][UPP_N_PHAS] =
 {
   {// RH=0%
