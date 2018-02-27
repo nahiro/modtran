@@ -446,26 +446,32 @@ int WriteCard2C_V4(FILE *fp)
 
 int WriteCard2D_V4(FILE *fp)
 {
-  int i;
+  int i,n;
 
   // CARD 2D
-  fprintf(fp,"%5d%5d%5d%5d\n",mie_n_wlen,0,0,0);
-  // CARD 2D1
-  fprintf(fp,"%10.3e%70s\n",0.0,"title");
-  // CARD 2D2
-  for(i=0; i<mie_n_wlen; i++)
+  fprintf(fp,"%5d%5d%5d%5d\n",sim_n_aers_wlen[0],sim_n_aers_wlen[1],
+                              sim_n_aers_wlen[2],sim_n_aers_wlen[3]);
+  for(n=0; n<4; n++)
   {
-    #ifdef OLDMODE
-    cprintf(fp,"%6.2f%7.5f%7.5f%6.4f%s",mie_wlen_um[i],mie_aext[i]/mie_aext[mie_iref],
-                                        (mie_aext[i]-mie_asca[i])/mie_aext[mie_iref],mie_asym[i],
-                                        i==mie_n_wlen-1?"\n":(i%3)==2?"\n":"");
-    #else
-    // To increase the precision, aruexa.f line 70 must be modified as following:
-    // READ(IRD, '((3(F15.11,2F15.13,F15.13)))')                &
-    cprintf(fp,"%15.11f%15.13f%15.13f%15.13f%s",mie_wlen_um[i],mie_aext[i]/mie_aext[mie_iref],
-                                                (mie_aext[i]-mie_asca[i])/mie_aext[mie_iref],mie_asym[i],
-                                                i==mie_n_wlen-1?"\n":(i%3)==2?"\n":"");
-    #endif
+    if(sim_n_aers_wlen[n] < 1)
+    {
+      continue;
+    }
+    // CARD 2D1
+    fprintf(fp,"%10.3e%70s\n",0.0,"title");
+    // CARD 2D2
+    for(i=0; i<sim_n_aers_wlen[n]; i++)
+    {
+      #ifdef OLDMODE
+      cprintf(fp,"%6.2f%7.5f%7.5f%6.4f%s",sim_aers_wlen_um[n][i],sim_aers_cext[n],sim_aers_cabs[n],sim_aers_asym[n],
+                                          i==sim_n_aers_wlen[n]-1?"\n":(i%3)==2?"\n":"");
+      #else
+      // To increase the precision, aruexa.f line 70 must be modified as following:
+      // READ(IRD, '((3(F15.11,2F15.13,F15.13)))')                &
+      cprintf(fp,"%15.11f%15.13f%15.13f%15.13f%s",sim_aers_wlen_um[n][i],sim_aers_cext[n],sim_aers_cabs[n],sim_aers_asym[i],
+                                                  i==sim_n_aers_wlen[n]-1?"\n":(i%3)==2?"\n":"");
+      #endif
+    }
   }
 
   return 0;
