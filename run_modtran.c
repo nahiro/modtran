@@ -2757,16 +2757,10 @@ int SetMie2(int iaer)
     fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
     return -1;
   }
-  sim_n_aers_wlen[iaer] = mie_n_wlen;
-  sim_aers_wlen_um[iaer] = mie_wlen_um;
-  sim_aers_aext[iaer] = mie_aext;
-  sim_aers_asca[iaer] = mie_asca;
-  sim_aers_asym[iaer] = mie_asym;
-
-
 
   sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
-  if(sim_phas_wlen_um == NULL)
+  sim_aers_phas[iaer] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
+  if(sim_phas_wlen_um==NULL || sim_aers_phas[iaer]==NULL)
   {
     fprintf(stderr,"%s: failed in allocating memory\n",fnam);
     return -1;
@@ -2776,61 +2770,10 @@ int SetMie2(int iaer)
     sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
   }
 
-  sim_aers_phas[iaer] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  if(sim_aers_phas[iaer]==NULL)
-  {
-  }
-
-
-  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
-              sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,0) < 0)
+  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,1) < 0)
   {
     return -1;
   }
-
-
-
-
-
-
-
-  sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
-  if(sim_phas_wlen_um == NULL)
-  {
-    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
-    return -1;
-  }
-  for(i=0; i<sim_n_phas_wlen; i++)
-  {
-    sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
-  }
-  sim_aers_phas[iaer] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  if(sim_aers_phas[iaer] == NULL)
-  {
-    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
-    return -1;
-  }
-  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
-              sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,0) < 0)
-  {
-    return -1;
-  }
-
-
-
-  sim_aers_phas[iaer] = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  sim_aers_phas[iaer] = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  sim_aers_phas[iaer] = (double*)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-
-
-
-  Interp2D(mie_wlen,mie_angl,mie_tropo_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,1);
-  Interp2D(mie_wlen,mie_angl,mie_strat_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,0);
-  Interp2D(mie_wlen,mie_angl,mie_meteo_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,0);
-
-
-
-
 
   for(n=0; n<mie_n_comp; n++)
   {
