@@ -490,9 +490,6 @@ double	*mie_angl_dif			= NULL;
 double	*mie_phs1			= NULL;
 double	*mie_phs2			= NULL;
 double	*mie_phas			= NULL;
-double	*mie_tropo_phas			= NULL;
-double	*mie_strat_phas			= NULL;
-double	*mie_meteo_phas			= NULL;
 double	*mie_refr_com[MIE_MAXCOMP];				// Refractive index (real)
 double	*mie_refi_com[MIE_MAXCOMP];				// Refractive index (imaginary)
 double	*mie_aext_com[MIE_MAXCOMP];				// Extinction coefficient
@@ -2804,9 +2801,6 @@ int SetMie2(int iaer)
   free(mie_phs1);
   free(mie_phs2);
   free(mie_phas);
-  free(mie_tropo_phas);
-  free(mie_strat_phas);
-  free(mie_meteo_phas);
 
   return 0;
 }
@@ -2879,17 +2873,13 @@ int upper_pfunc(int iaer)
   double *tropo_phas_tmp1 = NULL;
   double *tropo_phas_tmp2 = NULL;
 
-  mie_tropo_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-  mie_strat_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-  mie_meteo_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-  if(mie_tropo_phas==NULL || mie_strat_phas==NULL || mie_meteo_phas==NULL)
+  mie_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
+  if(mie_phas == NULL)
   {
     fprintf(stderr,"upper_pfunc: error in allocating memory\n");
     return -1;
   }
 
-  Interp2D(upp_wlen,upp_angl,upp_strat_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_strat_phas,mie_n_wlen,mie_n_angl,1);
-  Interp2D(upp_wlen,upp_angl,upp_meteo_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_meteo_phas,mie_n_wlen,mie_n_angl,0);
   i_1 = i_2 = -1;
   for(i=UPP_N_RHUM-1; i>=0; i--)
   {
@@ -2920,7 +2910,7 @@ int upper_pfunc(int iaer)
       for(j=0; j<mie_n_angl; j++)
       {
         k = mie_n_angl*i+j;
-        mie_tropo_phas[k] = INTERP(upp_rh,upp_rhum[i_1],upp_rhum[i_2],tropo_phas_tmp1[k],tropo_phas_tmp2[k]);
+        mie_phas[k] = INTERP(upp_rh,upp_rhum[i_1],upp_rhum[i_2],tropo_phas_tmp1[k],tropo_phas_tmp2[k]);
       }
     }
     free(tropo_phas_tmp1);
@@ -2928,7 +2918,7 @@ int upper_pfunc(int iaer)
   }
   else
   {
-    Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_tropo_phas,mie_n_wlen,mie_n_angl,0);
+    Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,0);
   }
 
   for(i=0; i<mie_n_wlen; i++)
@@ -2937,16 +2927,12 @@ int upper_pfunc(int iaer)
     for(j=1; j<mie_n_angl; j++)
     {
       k = mie_n_angl*i+j;
-      p1 += (mie_tropo_phas[k-1]*mie_angl_sin[j-1]+mie_tropo_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
-      p2 += (mie_strat_phas[k-1]*mie_angl_sin[j-1]+mie_strat_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
-      p3 += (mie_meteo_phas[k-1]*mie_angl_sin[j-1]+mie_meteo_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
+      p1 += (mie_phas[k-1]*mie_angl_sin[j-1]+mie_phas[k]*mie_angl_sin[j])*mie_angl_dif[j];
     }
     for(j=0; j<mie_n_angl; j++)
     {
       k = mie_n_angl*i+j;
-      mie_tropo_phas[k] /= p1;
-      mie_strat_phas[k] /= p2;
-      mie_meteo_phas[k] /= p3;
+      mie_phas[k] /= p1;
     }
   }
 
