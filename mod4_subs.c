@@ -447,10 +447,10 @@ int WriteCard2C_V4(FILE *fp)
 int WriteCard2D_V4(FILE *fp)
 {
   int i,n;
+  char line[MAXLINE];
 
   // CARD 2D
-  fprintf(fp,"%5d%5d%5d%5d\n",sim_n_aers_wlen[0],sim_n_aers_wlen[1],
-                              sim_n_aers_wlen[2],sim_n_aers_wlen[3]);
+  fprintf(fp,"%5d%5d%5d%5d\n",sim_n_aers_wlen[0],sim_n_aers_wlen[1],sim_n_aers_wlen[2],sim_n_aers_wlen[3]);
   for(n=0; n<4; n++)
   {
     if(sim_n_aers_wlen[n] < 1)
@@ -458,17 +458,18 @@ int WriteCard2D_V4(FILE *fp)
       continue;
     }
     // CARD 2D1
-    fprintf(fp,"%10.3e%70s\n",0.0,"title");
+    snprintf(line,70,"AERSOL#%d",n+1);
+    fprintf(fp,"%10.3e%70s\n",0.0,line);
     // CARD 2D2
     for(i=0; i<sim_n_aers_wlen[n]; i++)
     {
       #ifdef OLDMODE
-      cprintf(fp,"%6.2f%7.5f%7.5f%6.4f%s",sim_aers_wlen_um[n][i],sim_aers_cext[n],sim_aers_cabs[n],sim_aers_asym[n],
+      cprintf(fp,"%6.2f%7.5f%7.5f%6.4f%s",sim_aers_wlen_um[n][i],sim_aers_cext[n][i],sim_aers_cabs[n][i],sim_aers_asym[n][i],
                                           i==sim_n_aers_wlen[n]-1?"\n":(i%3)==2?"\n":"");
       #else
       // To increase the precision, aruexa.f line 70 must be modified as following:
       // READ(IRD, '((3(F15.11,2F15.13,F15.13)))')                &
-      cprintf(fp,"%15.11f%15.13f%15.13f%15.13f%s",sim_aers_wlen_um[n][i],sim_aers_cext[n],sim_aers_cabs[n],sim_aers_asym[i],
+      cprintf(fp,"%15.11f%15.13f%15.13f%15.13f%s",sim_aers_wlen_um[n][i],sim_aers_cext[n][i],sim_aers_cabs[n][i],sim_aers_asym[n][i],
                                                   i==sim_n_aers_wlen[n]-1?"\n":(i%3)==2?"\n":"");
       #endif
     }
