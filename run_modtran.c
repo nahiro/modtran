@@ -2869,61 +2869,83 @@ int upper_pfunc(int iaer)
 {
   int i,j,k;
   int i_1,i_2;
-  double p1,p2,p3;
+  double p1;
   double *tropo_phas_tmp1 = NULL;
   double *tropo_phas_tmp2 = NULL;
+  char fnam[] = "upper_pfunc";
+
+  if(iaer<1 || iaer>3)
+  {
+    fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
+    return -1;
+  }
 
   mie_phas = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
   if(mie_phas == NULL)
   {
-    fprintf(stderr,"upper_pfunc: error in allocating memory\n");
+    fprintf(stderr,"%s: error in allocating memory\n",fnam);
     return -1;
   }
 
-  i_1 = i_2 = -1;
-  for(i=UPP_N_RHUM-1; i>=0; i--)
+  switch(iaer)
   {
-    if(upp_rhum[i] <= upp_rh)
-    {
-      i_1 = i;
-      break;
-    }
-  }
-  if(i_1 < 0) i_1 = 0;
-  for(i=0; i<UPP_N_RHUM; i++)
-  {
-    if(upp_rhum[i] >= upp_rh)
-    {
-      i_2 = i;
-      break;
-    }
-  }
-  if(i_2 < 0) i_2 = UPP_N_RHUM-1;
-  if(i_1 != i_2)
-  {
-    tropo_phas_tmp1 = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-    tropo_phas_tmp2 = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-    Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp1,mie_n_wlen,mie_n_angl,0);
-    Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_2],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp2,mie_n_wlen,mie_n_angl,0);
-    for(i=0; i<mie_n_wlen; i++)
-    {
-      for(j=0; j<mie_n_angl; j++)
+    case 1:
+      i_1 = i_2 = -1;
+      for(i=UPP_N_RHUM-1; i>=0; i--)
       {
-        k = mie_n_angl*i+j;
-        mie_phas[k] = INTERP(upp_rh,upp_rhum[i_1],upp_rhum[i_2],tropo_phas_tmp1[k],tropo_phas_tmp2[k]);
+        if(upp_rhum[i] <= upp_rh)
+        {
+          i_1 = i;
+          break;
+        }
       }
-    }
-    free(tropo_phas_tmp1);
-    free(tropo_phas_tmp2);
-  }
-  else
-  {
-    Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,0);
+      if(i_1 < 0) i_1 = 0;
+      for(i=0; i<UPP_N_RHUM; i++)
+      {
+        if(upp_rhum[i] >= upp_rh)
+        {
+          i_2 = i;
+          break;
+        }
+      }
+      if(i_2 < 0) i_2 = UPP_N_RHUM-1;
+      if(i_1 != i_2)
+      {
+        tropo_phas_tmp1 = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
+        tropo_phas_tmp2 = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
+        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp1,mie_n_wlen,mie_n_angl,0);
+        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_2],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp2,mie_n_wlen,mie_n_angl,0);
+        for(i=0; i<mie_n_wlen; i++)
+        {
+          for(j=0; j<mie_n_angl; j++)
+          {
+            k = mie_n_angl*i+j;
+            mie_phas[k] = INTERP(upp_rh,upp_rhum[i_1],upp_rhum[i_2],tropo_phas_tmp1[k],tropo_phas_tmp2[k]);
+          }
+        }
+        free(tropo_phas_tmp1);
+        free(tropo_phas_tmp2);
+      }
+      else
+      {
+        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,1);
+      }
+      break
+    case 2:
+      Interp2D(upp_wlen,upp_angl,upp_strat_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,1);
+      break
+    case 3:
+      Interp2D(upp_wlen,upp_angl,upp_meteo_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,1);
+      break
+    default:
+      fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
+      return -1;
+      break
   }
 
   for(i=0; i<mie_n_wlen; i++)
   {
-    p1 = p2 = p3 = 0.0;
+    p1 = 0.0;
     for(j=1; j<mie_n_angl; j++)
     {
       k = mie_n_angl*i+j;
