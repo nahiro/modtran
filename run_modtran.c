@@ -256,7 +256,7 @@ int Convolute(double xmin,double xmax,double xstp,double xsgm,double wsgm,
               int nout,double *xout,double *yout);
 double Gauss(double g,double f0,double f);
 int Interp2D(const double *x1,const double *y1,const double *z1,int nx1,int ny1,
-             const double *x2,const double *y2,      double *z2,int nx2,int ny2,int f);
+             const double *x2,const double *y2,      double *z2,int nx2,int ny2,long f);
 int Sampling(int ninp,const double *xinp,const double *yinp,
              int nout,const double *xout,double *yout,double yuni);
 int SamplingE(int ninp,const double *xinp,const double *yinp,
@@ -2767,7 +2767,8 @@ int SetMie2(int iaer)
     sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
   }
 
-  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,1) < 0)
+  if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
+              sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,-1111) < 0)
   {
     return -1;
   }
@@ -2913,8 +2914,10 @@ int upper_pfunc(int iaer)
       {
         tropo_phas_tmp1 = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
         tropo_phas_tmp2 = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp1,mie_n_wlen,mie_n_angl,1);
-        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_2],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp2,mie_n_wlen,mie_n_angl,0);
+        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,
+                 mie_wlen,mie_angl,tropo_phas_tmp1,mie_n_wlen,mie_n_angl,-2222);
+        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_2],UPP_N_WLEN,UPP_N_ANGL,
+                 mie_wlen,mie_angl,tropo_phas_tmp2,mie_n_wlen,mie_n_angl,2222);
         for(i=0; i<mie_n_wlen; i++)
         {
           for(j=0; j<mie_n_angl; j++)
@@ -2928,14 +2931,17 @@ int upper_pfunc(int iaer)
       }
       else
       {
-        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,1);
+        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,
+                 mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,-2222);
       }
       break
     case 2:
-      Interp2D(upp_wlen,upp_angl,upp_strat_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,1);
+      Interp2D(upp_wlen,upp_angl,upp_strat_phas,UPP_N_WLEN,UPP_N_ANGL,
+               mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,-2222);
       break
     case 3:
-      Interp2D(upp_wlen,upp_angl,upp_meteo_phas,UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,1);
+      Interp2D(upp_wlen,upp_angl,upp_meteo_phas,UPP_N_WLEN,UPP_N_ANGL,
+               mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,-2222);
       break
     default:
       fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
@@ -3535,19 +3541,20 @@ double Gauss(double s,double x0,double x)
 }
 
 int Interp2D(const double *x1,const double *y1,const double *z1,int nx1,int ny1,
-             const double *x2,const double *y2,      double *z2,int nx2,int ny2,int f)
+             const double *x2,const double *y2,      double *z2,int nx2,int ny2,long f)
 {
   // x1[nx1],y1[ny1],z1[nx1*ny1]
   // x2[nx2],y2[ny2],z2[nx2*ny2]
   // x1,y1 must be arranged in ascending order
   int i,j,k;
-  static int flag = -9999;
+  static long flag = -9999;
   static int *i_1 = NULL;
   static int *i_2 = NULL;
   static int *j_1 = NULL;
   static int *j_2 = NULL;
   int k_1,k_2;
   double p1,p2;
+  char fnam[] = "Interp2D";
 
   if(f<=0 || f!=flag)
   {
@@ -3561,7 +3568,7 @@ int Interp2D(const double *x1,const double *y1,const double *z1,int nx1,int ny1,
     j_2 = (int*)malloc(ny2*sizeof(int));
     if(i_1==NULL || i_2==NULL || j_1==NULL || j_2==NULL)
     {
-      fprintf(stderr,"Interp2D: error in allocating memory\n");
+      fprintf(stderr,"%s: error in allocating memory\n",fnam);
       return -1;
     }
     for(i=0; i<nx2; i++)
@@ -3611,7 +3618,7 @@ int Interp2D(const double *x1,const double *y1,const double *z1,int nx1,int ny1,
       }
       if(cnt_db)
       {
-        fprintf(stderr,"Interp2D: i_1[%d]=%d, i_2[%d]=%d\n",i,i_1[i],i,i_2[i]);
+        fprintf(stderr,"%s: i_1[%d]=%d, i_2[%d]=%d\n",fnam,i,i_1[i],i,i_2[i]);
       }
     }
     for(i=0; i<ny2; i++)
@@ -3661,7 +3668,7 @@ int Interp2D(const double *x1,const double *y1,const double *z1,int nx1,int ny1,
       }
       if(cnt_db)
       {
-        fprintf(stderr,"Interp2D: j_1[%d]=%d, j_2[%d]=%d\n",i,j_1[i],i,j_2[i]);
+        fprintf(stderr,"%s: j_1[%d]=%d, j_2[%d]=%d\n",fnam,i,j_1[i],i,j_2[i]);
       }
     }
     flag = abs(f);
