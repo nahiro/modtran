@@ -2913,7 +2913,7 @@ int upper_pfunc(int iaer)
       {
         tropo_phas_tmp1 = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
         tropo_phas_tmp2 = (double*)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
-        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp1,mie_n_wlen,mie_n_angl,0);
+        Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp1,mie_n_wlen,mie_n_angl,1);
         Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_2],UPP_N_WLEN,UPP_N_ANGL,mie_wlen,mie_angl,tropo_phas_tmp2,mie_n_wlen,mie_n_angl,0);
         for(i=0; i<mie_n_wlen; i++)
         {
@@ -3541,7 +3541,7 @@ int Interp2D(const double *x1,const double *y1,const double *z1,int nx1,int ny1,
   // x2[nx2],y2[ny2],z2[nx2*ny2]
   // x1,y1 must be arranged in ascending order
   int i,j,k;
-  static int flag = 1;
+  static int flag = -9999;
   static int *i_1 = NULL;
   static int *i_2 = NULL;
   static int *j_1 = NULL;
@@ -3549,7 +3549,7 @@ int Interp2D(const double *x1,const double *y1,const double *z1,int nx1,int ny1,
   int k_1,k_2;
   double p1,p2;
 
-  if(flag==1 || f==1)
+  if(f<=0 || f!=flag)
   {
     if(i_1 != NULL) free(i_1);
     if(i_2 != NULL) free(i_2);
@@ -3664,7 +3664,7 @@ int Interp2D(const double *x1,const double *y1,const double *z1,int nx1,int ny1,
         fprintf(stderr,"Interp2D: j_1[%d]=%d, j_2[%d]=%d\n",i,j_1[i],i,j_2[i]);
       }
     }
-    flag = 0;
+    flag = abs(f);
   }
 
   for(i=0; i<nx2; i++)
