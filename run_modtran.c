@@ -5532,71 +5532,6 @@ int ReadConfig(void)
     } else
     if(strcasecmp(str[0],"mie_angl") == 0)
     {
-      num = 0;
-      uni = 1.0;
-      mie_angl_min = MIE_ANGL_MIN;
-      mie_angl_max = MIE_ANGL_MAX;
-      if(n > 2)
-      {
-        errno = 0;
-        num = strtol(str[2],&p,10);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 3)
-      {
-        if(strncasecmp(str[3],"deg",3) == 0)
-        {
-          uni = 1.0;
-        } else
-        if(strncasecmp(str[3],"rad",3) == 0)
-        {
-          uni = R_TO_D;
-        }
-        else
-        {
-          fprintf(stderr,"%s: parameter error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 4)
-      {
-        errno = 0;
-        mie_angl_min = strtod(str[4],&p);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 5)
-      {
-        errno = 0;
-        mie_angl_max = strtod(str[5],&p);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 1)
-      {
-        if(strcmp(str[1],NONAME) != 0)
-        {
-          if((mie_n_angl=Read1A(str[1],MIE_MAXDATA,num,uni,AnglSelect,mie_angl)) < 1)
-          {
-            err = 1;
-            break;
-          }
-        }
-      }
       if(cnt_hp && cnt_n_cmnt<CNT_MAXCMNT)
       {
         snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s %4d %s %13.4f %13.4f\n",str[0],str[1],
@@ -6049,11 +5984,17 @@ int ReadAngl(char *s,int size,**angl)
   }
   if(ns > 3)
   {
-    errno = 0;
-    uni = strtod(str[3],&p);
-    if(errno==ERANGE || *p!='\0')
+    if(strncasecmp(str[3],"deg",3) == 0)
     {
-      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      uni = 1.0;
+    } else
+    if(strncasecmp(str[3],"rad",3) == 0)
+    {
+      uni = R_TO_D;
+    }
+    else
+    {
+      fprintf(stderr,"%s: parameter error >>> %s\n",fnam,s);
       return -1;
     }
   }
@@ -6081,7 +6022,7 @@ int ReadAngl(char *s,int size,**angl)
   {
     if(strcmp(str[1],NONAME) != 0)
     {
-      if((n_angl=Read1P(str[1],size,num,uni,WaveSelect,angl)) < 1)
+      if((n_angl=Read1P(str[1],size,num,uni,AnglSelect,angl)) < 1)
       {
         return -1;
       }
