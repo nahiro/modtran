@@ -5511,81 +5511,6 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_angl") == 0)
-    {
-      num = 0;
-      uni = 1.0;
-      mie_angl_min = MIE_ANGL_MIN;
-      mie_angl_max = MIE_ANGL_MAX;
-      if(n > 2)
-      {
-        errno = 0;
-        num = strtol(str[2],&p,10);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 3)
-      {
-        if(strncasecmp(str[3],"deg",3) == 0)
-        {
-          uni = 1.0;
-        } else
-        if(strncasecmp(str[3],"rad",3) == 0)
-        {
-          uni = R_TO_D;
-        }
-        else
-        {
-          fprintf(stderr,"%s: parameter error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 4)
-      {
-        errno = 0;
-        mie_angl_min = strtod(str[4],&p);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 5)
-      {
-        errno = 0;
-        mie_angl_max = strtod(str[5],&p);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 1)
-      {
-        if(strcmp(str[1],NONAME) != 0)
-        {
-          if((mie_n_angl=Read1A(str[1],MIE_MAXDATA,num,uni,AnglSelect,mie_angl)) < 1)
-          {
-            err = 1;
-            break;
-          }
-        }
-      }
-      if(cnt_hp && cnt_n_cmnt<CNT_MAXCMNT)
-      {
-        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s %4d %s %13.4f %13.4f\n",str[0],str[1],
-                                               num,fabs(uni-1.0)>DELTA?"rad":"deg",
-                                               mie_angl_min,mie_angl_max);
-        cnt_n_cmnt++;
-      }
-    } else
     if(strcasecmp(str[0],"mie_n_step") == 0)
     {
       if(n > 1)
@@ -5663,6 +5588,81 @@ int ReadConfig(void)
       if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
       {
         snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30.4e\n",str[0],mie_rmax);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_angl") == 0)
+    {
+      num = 0;
+      uni = 1.0;
+      mie_angl_min = MIE_ANGL_MIN;
+      mie_angl_max = MIE_ANGL_MAX;
+      if(n > 2)
+      {
+        errno = 0;
+        num = strtol(str[2],&p,10);
+        if(errno==ERANGE || *p!='\0')
+        {
+          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
+          err = 1;
+          break;
+        }
+      }
+      if(n > 3)
+      {
+        if(strncasecmp(str[3],"deg",3) == 0)
+        {
+          uni = 1.0;
+        } else
+        if(strncasecmp(str[3],"rad",3) == 0)
+        {
+          uni = R_TO_D;
+        }
+        else
+        {
+          fprintf(stderr,"%s: parameter error >>> %s\n",fnam,line);
+          err = 1;
+          break;
+        }
+      }
+      if(n > 4)
+      {
+        errno = 0;
+        mie_angl_min = strtod(str[4],&p);
+        if(errno==ERANGE || *p!='\0')
+        {
+          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
+          err = 1;
+          break;
+        }
+      }
+      if(n > 5)
+      {
+        errno = 0;
+        mie_angl_max = strtod(str[5],&p);
+        if(errno==ERANGE || *p!='\0')
+        {
+          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
+          err = 1;
+          break;
+        }
+      }
+      if(n > 1)
+      {
+        if(strcmp(str[1],NONAME) != 0)
+        {
+          if((mie_n_angl=Read1A(str[1],MIE_MAXDATA,num,uni,AnglSelect,mie_angl)) < 1)
+          {
+            err = 1;
+            break;
+          }
+        }
+      }
+      if(cnt_hp && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s %4d %s %13.4f %13.4f\n",str[0],str[1],
+                                               num,fabs(uni-1.0)>DELTA?"rad":"deg",
+                                               mie_angl_min,mie_angl_max);
         cnt_n_cmnt++;
       }
     } else
@@ -8090,14 +8090,26 @@ int Usage(void)
   fprintf(stderr,"prf_fhaz    # name #       | haz#(%d),file name(%s),column#(%d)\n",0,NONAME,1);
   fprintf(stderr,"prf_pres_gnd  value        | Ground pressure(%.1f)\n",NAN);
   fprintf(stderr,"prf_temp_gnd  value        | Ground temperature(%.1f)\n",NAN);
-  fprintf(stderr,"mie_angl      name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
-                                               NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
-  fprintf(stderr,"mie_wlen      name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
-                                               NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
   fprintf(stderr,"mie_n_step    value        | Log10(R) #steps(%d)\n",MIE_NSTP);
   fprintf(stderr,"mie_wsgm      value        | Log10(R) sigma(%.1f)\n",MIE_WSGM);
   fprintf(stderr,"mie_rmin      value        | min R in um(%.1f)\n",MIE_RMIN);
   fprintf(stderr,"mie_rmax      value        | max R in um(%.1f)\n",MIE_RMAX);
+  fprintf(stderr,"mie_aer1_angl name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+                                               NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
+  fprintf(stderr,"mie_aer2_angl name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+                                               NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
+  fprintf(stderr,"mie_aer3_angl name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+                                               NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
+  fprintf(stderr,"mie_aer4_angl name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+                                               NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
+  fprintf(stderr,"mie_aer1_wlen name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
+  fprintf(stderr,"mie_aer2_wlen name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
+  fprintf(stderr,"mie_aer3_wlen name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
+  fprintf(stderr,"mie_aer4_wlen name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
   fprintf(stderr,"mie_aer1_cmp name # # u # #| file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
                                                "min line#(%d),max line#(10^%.0f)\n",
                                                NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
