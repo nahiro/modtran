@@ -5521,22 +5521,99 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_wlen") == 0)
+    if(strcasecmp(str[0],"mie_aer1_wav") == 0)
     {
-      if(cnt_hp && cnt_n_cmnt<CNT_MAXCMNT)
+      if(n > 1) // str[1] must be the file name
       {
-        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s %4d %13.6e %13.4f %13.4f\n",
-                                               str[0],str[1],num,uni,mie_wlen_min,mie_wlen_max);
+        snprintf(mie_aers_wav[0],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_angl") == 0)
+    if(strcasecmp(str[0],"mie_aer2_wav") == 0)
     {
-      if(cnt_hp && cnt_n_cmnt<CNT_MAXCMNT)
+      if(n > 1) // str[1] must be the file name
       {
-        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s %4d %s %13.4f %13.4f\n",str[0],str[1],
-                                               num,fabs(uni-1.0)>DELTA?"rad":"deg",
-                                               mie_angl_min,mie_angl_max);
+        snprintf(mie_aers_wav[1],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_aer3_wav") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_wav[2],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_aer4_wav") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_wav[3],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_aer1_ang") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_ang[0],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_aer2_ang") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_ang[1],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_aer3_ang") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_ang[2],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"mie_aer4_ang") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(mie_aers_ang[3],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
         cnt_n_cmnt++;
       }
     } else
