@@ -303,8 +303,8 @@ char    sim_modtran                     = SIM_MODTRAN;          // MODTRAN band 
 char    sim_speed                       = SIM_SPEED;            // Simulation speed
 int	sim_mode			= SIM_MODE_DSR_MODTRAN_BO; // Simulation mode
 int	sim_n_aers_wlen[4]		= {NODATA,NODATA,NODATA,NODATA}; // #Wavelengths for cext, etc.
-int	sim_n_phas_wlen			= SIM_N_PHAS_WLEN;	// #Wavelengths for phase function
-int	sim_n_phas_angl			= SIM_N_PHAS_ANGL;	// #Angles
+int	sim_n_phas_wlen			= NODATA;		// #Wavelengths for phase function
+int	sim_n_phas_angl			= NODATA;		// #Angles
 int	sim_n_dir			= NODATA;		// #Directions
 int	sim_flag			= SIM_FLAG;		// Simulation flag
 int	sim_itype			= SIM_ITYPE;		// LOS geometric type
@@ -347,12 +347,17 @@ double	sim_xsgm			= SIM_XSGM;		// X sigma
 double	sim_wsgm			= SIM_WSGM;		// X width in sigma
 double	sim_yuni			= SIM_YUNI;		// Y unit
 double	sim_dmax			= SIM_DMAX;		// Max wavelength difference in nm
-double	sim_phas_wlen[SIM_MAX_PHAS_WLEN]=
+double	sim_aers_wlen_default[SIM_N_AERS_WLEN] =
 {
   300.0, 337.1, 400.0,  488.0,  514.5, 550.0,
   632.8, 694.3, 860.0, 1060.0, 1300.0,
 };
-double	sim_phas_angl[SIM_MAX_PHAS_ANGL]=
+double	sim_phas_wlen_default[SIM_N_PHAS_WLEN] =
+{
+  300.0, 337.1, 400.0,  488.0,  514.5, 550.0,
+  632.8, 694.3, 860.0, 1060.0, 1300.0,
+};
+double	sim_phas_angl_default[SIM_N_PHAS_ANGL] =
 {
     0.0,   0.5,   1.0,   1.5,   2.0,   2.5,   3.0,   3.5,
     4.0,   4.5,   5.0,   6.0,   7.0,   8.0,   9.0,  10.0,
@@ -363,11 +368,14 @@ double	sim_phas_angl[SIM_MAX_PHAS_ANGL]=
   176.0, 180.0,
 };
 double	*sim_dir[4]			= {NULL,NULL,NULL,NULL};
+double	*sim_aers_wlen[4]		= {NULL,NULL,NULL,NULL};
 double	*sim_aers_wlen_um[4]		= {NULL,NULL,NULL,NULL};
 double	*sim_aers_cext[4]		= {NULL,NULL,NULL,NULL};
 double	*sim_aers_cabs[4]		= {NULL,NULL,NULL,NULL};
 double	*sim_aers_asym[4]		= {NULL,NULL,NULL,NULL};
+double	*sim_phas_wlen			= NULL;
 double	*sim_phas_wlen_um		= NULL;
+double	*sim_phas_angl			= NULL;
 double	*sim_aers_phas[4]		= {NULL,NULL,NULL,NULL};
 double	sim_wlen_min			= SIM_WLEN_MIN;		// Min wavelength in nm
 double	sim_wlen_max			= SIM_WLEN_MAX;		// Max wavelength in nm
