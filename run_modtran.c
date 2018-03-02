@@ -5571,39 +5571,6 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_wlen_ref") == 0)
-    {
-      uni = 1.0;
-      if(n > 2)
-      {
-        errno = 0;
-        xtmp = strtod(str[2],&p);
-        if(errno!=ERANGE && *p=='\0') uni = xtmp;
-        else
-        {
-          fprintf(stderr,"%s: out of range >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 1)
-      {
-        errno = 0;
-        xtmp = strtod(str[1],&p);
-        if(errno!=ERANGE && *p=='\0' && xtmp>0.0) mie_wlen_ref = xtmp*uni;
-        else
-        {
-          fprintf(stderr,"%s: out of range >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
-      {
-        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30.14e\n",str[0],mie_wlen_ref);
-        cnt_n_cmnt++;
-      }
-    } else
     if(strcasecmp(str[0],"mie_n_step") == 0)
     {
       if(n > 1)
@@ -8112,7 +8079,6 @@ int Usage(void)
                                                NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
   fprintf(stderr,"mie_wlen      name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
                                                NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
-  fprintf(stderr,"mie_wlen_ref  value unit   | ref wlen(%.1f),unit in nm(%.1f)\n",MIE_WLEN_REF,1.0);
   fprintf(stderr,"mie_n_step    value        | Log10(R) #steps(%d)\n",MIE_NSTP);
   fprintf(stderr,"mie_wsgm      value        | Log10(R) sigma(%.1f)\n",MIE_WSGM);
   fprintf(stderr,"mie_rmin      value        | min R in um(%.1f)\n",MIE_RMIN);
