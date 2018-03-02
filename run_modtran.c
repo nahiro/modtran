@@ -5658,7 +5658,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_cmp1") == 0)
+    if(strcasecmp(str[0],"mie_aer1_cmp") == 0)
     {
       if(n > 1) // str[1] must be the file name
       {
@@ -5670,7 +5670,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_cmp2") == 0)
+    if(strcasecmp(str[0],"mie_aer2_cmp") == 0)
     {
       if(n > 1) // str[1] must be the file name
       {
@@ -5682,7 +5682,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_cmp3") == 0)
+    if(strcasecmp(str[0],"mie_aer3_cmp") == 0)
     {
       if(n > 1) // str[1] must be the file name
       {
@@ -5694,7 +5694,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_cmp4") == 0)
+    if(strcasecmp(str[0],"mie_aer4_cmp") == 0)
     {
       if(n > 1) // str[1] must be the file name
       {
@@ -5706,7 +5706,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_inp1") == 0)
+    if(strcasecmp(str[0],"mie_aer1_inp") == 0)
     {
       if(n > 1)
       {
@@ -5719,7 +5719,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_inp2") == 0)
+    if(strcasecmp(str[0],"mie_aer2_inp") == 0)
     {
       if(n > 1)
       {
@@ -5732,7 +5732,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_inp3") == 0)
+    if(strcasecmp(str[0],"mie_aer3_inp") == 0)
     {
       if(n > 1)
       {
@@ -5745,7 +5745,7 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"mie_inp4") == 0)
+    if(strcasecmp(str[0],"mie_aer4_inp") == 0)
     {
       if(n > 1)
       {
@@ -8090,22 +8090,22 @@ int Usage(void)
   fprintf(stderr,"mie_wsgm      value        | Log10(R) sigma(%.1f)\n",MIE_WSGM);
   fprintf(stderr,"mie_rmin      value        | min R in um(%.1f)\n",MIE_RMIN);
   fprintf(stderr,"mie_rmax      value        | max R in um(%.1f)\n",MIE_RMAX);
-  fprintf(stderr,"mie_cmp1    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
+  fprintf(stderr,"mie_aer1_cmp name # # u # #| file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
                                                "min line#(%d),max line#(10^%.0f)\n",
                                                NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
-  fprintf(stderr,"mie_cmp2    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
+  fprintf(stderr,"mie_aer2_cmp name # # u # #| file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
                                                "min line#(%d),max line#(10^%.0f)\n",
                                                NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
-  fprintf(stderr,"mie_cmp3    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
+  fprintf(stderr,"mie_aer3_cmp name # # u # #| file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
                                                "min line#(%d),max line#(10^%.0f)\n",
                                                NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
-  fprintf(stderr,"mie_cmp4    name # # u # # | file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
+  fprintf(stderr,"mie_aer4_cmp name # # u # #| file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
                                                "min line#(%d),max line#(10^%.0f)\n",
                                                NONAME,MIE_REAL_NUM,MIE_IMAG_NUM,1.0,MIE_IMIN,log10((double)MIE_IMAX));
-  fprintf(stderr,"mie_inp1      name         | file name(%s)\n",NONAME);
-  fprintf(stderr,"mie_inp2      name         | file name(%s)\n",NONAME);
-  fprintf(stderr,"mie_inp3      name         | file name(%s)\n",NONAME);
-  fprintf(stderr,"mie_inp4      name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_aer1_inp  name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_aer2_inp  name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_aer3_inp  name         | file name(%s)\n",NONAME);
+  fprintf(stderr,"mie_aer4_inp  name         | file name(%s)\n",NONAME);
   fprintf(stderr,"upp_rh        value        | RH of upper atmosphere in %%(%.1f)\n",UPP_RH);
   fprintf(stderr,"cld_thik      value        | Cloud thickness(%.1f)\n",CLD_THIK);
   fprintf(stderr,"cld_alt       value        | Cloud altitude(%.1f)\n",CLD_ALT);
