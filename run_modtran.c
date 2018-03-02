@@ -5952,7 +5952,8 @@ int ReadWlen(char *s,int size,**wlen)
   {
     if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
   }
-  if(strcasecmp(str[0],"mie_cmp") != 0)
+  str[0][7] = 's';
+  if(strcasecmp(str[0],"mie_aers_wav") != 0)
   {
     fprintf(stderr,"%s: error in input >>> %s\n",fnam,s);
     return -1;
@@ -6039,7 +6040,8 @@ int ReadAngl(char *s,int size,**angl)
   {
     if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
   }
-  if(strcasecmp(str[0],"mie_cmp") != 0)
+  str[0][7] = 's';
+  if(strcasecmp(str[0],"mie_aers_ang") != 0)
   {
     fprintf(stderr,"%s: error in input >>> %s\n",fnam,s);
     return -1;
@@ -8224,21 +8226,21 @@ int Usage(void)
   fprintf(stderr,"mie_wsgm      value        | Log10(R) sigma(%.1f)\n",MIE_WSGM);
   fprintf(stderr,"mie_rmin      value        | min R in um(%.1f)\n",MIE_RMIN);
   fprintf(stderr,"mie_rmax      value        | max R in um(%.1f)\n",MIE_RMAX);
-  fprintf(stderr,"mie_aer1_wlen name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+  fprintf(stderr,"mie_aer1_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
                                                NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
-  fprintf(stderr,"mie_aer2_wlen name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+  fprintf(stderr,"mie_aer2_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
                                                NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
-  fprintf(stderr,"mie_aer3_wlen name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+  fprintf(stderr,"mie_aer3_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
                                                NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
-  fprintf(stderr,"mie_aer4_wlen name # u m M | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+  fprintf(stderr,"mie_aer4_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
                                                NONAME,0,1.0,MIE_WLEN_MIN,MIE_WLEN_MAX);
-  fprintf(stderr,"mie_aer1_angl name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+  fprintf(stderr,"mie_aer1_ang name # u m M  | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
                                                NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
-  fprintf(stderr,"mie_aer2_angl name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+  fprintf(stderr,"mie_aer2_ang name # u m M  | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
                                                NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
-  fprintf(stderr,"mie_aer3_angl name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+  fprintf(stderr,"mie_aer3_ang name # u m M  | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
                                                NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
-  fprintf(stderr,"mie_aer4_angl name # u m M | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+  fprintf(stderr,"mie_aer4_ang name # u m M  | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
                                                NONAME,0,"deg",MIE_ANGL_MIN,MIE_ANGL_MAX);
   fprintf(stderr,"mie_aer1_cmp name # # u # #| file name(%s),real column#(%d),imag column#(%d),wlen unit in nm(%.1f),"
                                                "min line#(%d),max line#(10^%.0f)\n",
