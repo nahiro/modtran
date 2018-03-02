@@ -5924,14 +5924,13 @@ int AnglSelect(double *a)
 
 int ReadWlen(char *s,int size,**wlen)
 {
-  int i,j,n;
   int nc,ns;
+  int num;
   int n_wlen = 0;
-  char line[MAXLINE];
+  double uni;
   char str[MAXITEM][MAXLINE];
   char fnam[] = "ReadWlen";
   char *p;
-  FILE *fp;
 
   num = 0;
   uni = 1.0;
@@ -5957,9 +5956,8 @@ int ReadWlen(char *s,int size,**wlen)
     num = strtol(str[2],&p,10);
     if(errno==ERANGE || *p!='\0')
     {
-      fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-      err = 1;
-      break;
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
     }
   }
   if(ns > 3)
@@ -5968,9 +5966,8 @@ int ReadWlen(char *s,int size,**wlen)
     uni = strtod(str[3],&p);
     if(errno==ERANGE || *p!='\0')
     {
-      fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-      err = 1;
-      break;
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
     }
   }
   if(ns > 4)
@@ -5979,9 +5976,8 @@ int ReadWlen(char *s,int size,**wlen)
     mie_wlen_min = strtod(str[4],&p);
     if(errno==ERANGE || *p!='\0')
     {
-      fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-      err = 1;
-      break;
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
     }
   }
   if(ns > 5)
@@ -5990,9 +5986,8 @@ int ReadWlen(char *s,int size,**wlen)
     mie_wlen_max = strtod(str[5],&p);
     if(errno==ERANGE || *p!='\0')
     {
-      fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-      err = 1;
-      break;
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
     }
   }
   if(ns > 1)
@@ -6001,13 +5996,104 @@ int ReadWlen(char *s,int size,**wlen)
     {
       if((n_wlen=Read1P(str[1],size,num,uni,WaveSelect,wlen)) < 1)
       {
-        err = 1;
-        break;
+        return -1;
       }
     }
   }
+  if(n_wlen < 1)
+  {
+    fprintf(stderr,"%s: error, n_wlen=%d (%s)\n",fnam,n_wlen,s);
+    return -1;
+  }
 
   return n_wlen;
+}
+
+int ReadAngl(char *s,int size,**angl)
+{
+  int nc,ns;
+  int num;
+  int n_angl = 0;
+  double uni;
+  char str[MAXITEM][MAXLINE];
+  char fnam[] = "ReadAngl";
+  char *p;
+
+  num = 0;
+  uni = 1.0;
+  mie_angl_min = MIE_ANGL_MIN;
+  mie_angl_max = MIE_ANGL_MAX;
+  for(ns=nc=0,p=s; ns<MAXITEM; ns++,p+=nc)
+  {
+    if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
+  }
+  if(strcasecmp(str[0],"mie_cmp") != 0)
+  {
+    fprintf(stderr,"%s: error in input >>> %s\n",fnam,s);
+    return -1;
+  } else
+  if(ns < 2)
+  {
+    fprintf(stderr,"%s: error, ns=%d (%s)\n",fnam,ns,s);
+    return -1;
+  }
+  if(ns > 2)
+  {
+    errno = 0;
+    num = strtol(str[2],&p,10);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+  if(ns > 3)
+  {
+    errno = 0;
+    uni = strtod(str[3],&p);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+  if(ns > 4)
+  {
+    errno = 0;
+    mie_angl_min = strtod(str[4],&p);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+  if(ns > 5)
+  {
+    errno = 0;
+    mie_angl_max = strtod(str[5],&p);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,s);
+      return -1;
+    }
+  }
+  if(ns > 1)
+  {
+    if(strcmp(str[1],NONAME) != 0)
+    {
+      if((n_angl=Read1P(str[1],size,num,uni,WaveSelect,angl)) < 1)
+      {
+        return -1;
+      }
+    }
+  }
+  if(n_angl < 1)
+  {
+    fprintf(stderr,"%s: error, n_angl=%d (%s)\n",fnam,n_angl,s);
+    return -1;
+  }
+
+  return n_angl;
 }
 
 int ReadComp(char *s,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi)
