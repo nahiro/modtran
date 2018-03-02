@@ -446,8 +446,8 @@ char	prf_ymon_nam[PRF_NMOLY][MAXLINE]=
 };
 // Parameters for Mie calculation
 int	mie_iref			= -1;			// Ref wave line#
-int	mie_n_wlen			= MIE_N_WLEN;		// #Wavelengths (output)
-int	mie_n_angl			= MIE_N_ANGL;		// #Angles
+int	mie_n_wlen			= NODATA;		// #Wavelengths (output)
+int	mie_n_angl			= NODATA;		// #Angles
 int	mie_n_comp			= NODATA;		// #Components
 int	mie_n_step			= MIE_NSTP;		// Log10(R) #steps
 int	mie_n_size[MIE_MAXCOMP];				// #Size parameters
@@ -458,18 +458,19 @@ char	mie_size_shape[MIE_MAXCOMP];				// Particle shape
 double	mie_wlen_ref			= MIE_WLEN_REF;		// Reference wavelength
 double	mie_wlen_min			= MIE_WLEN_MIN;		// Min wavelength in nm
 double	mie_wlen_max			= MIE_WLEN_MAX;		// Max wavelength in nm
-double	mie_wlen[MIE_MAXDATA]		=
+double	mie_wlen_default[MIE_N_WLEN]	=
 {
   300.0, 337.1, 400.0,  488.0,  514.5, 550.0,
   632.8, 694.3, 860.0, 1060.0, 1300.0,
 };
+double	*mie_wlen			= NULL;
 double	*mie_wlen_um			= NULL;
 double	*mie_aext			= NULL;
 double	*mie_asca			= NULL;
 double	*mie_asym			= NULL;
 double	mie_angl_min			= MIE_ANGL_MIN;		// Min angle in degree
 double	mie_angl_max			= MIE_ANGL_MAX;		// Max angle in degree
-double	mie_angl[MIE_MAXDATA]		=
+double	mie_angl_default[MIE_N_ANGL]	=
 {
     0.0,   0.5,   1.0,   1.5,   2.0,   2.5,   3.0,   3.5,   4.0,   4.5,   5.0,
     5.5,   6.0,   6.5,   7.0,   7.5,   8.0,   8.5,   9.0,   9.5,  10.0,  12.0,
@@ -483,6 +484,7 @@ double	mie_angl[MIE_MAXDATA]		=
   168.0, 170.0, 170.5, 171.0, 171.5, 172.0, 172.5, 173.0, 173.5, 174.0, 174.5,
   175.0, 175.5, 176.0, 176.5, 177.0, 177.5, 178.0, 178.5, 179.0, 179.5, 180.0,
 };
+double	*mie_angl			= NULL;
 double	*mie_angl_rad			= NULL;
 double	*mie_angl_sin			= NULL;
 double	*mie_angl_cos			= NULL;
@@ -2791,10 +2793,12 @@ int SetMie2(int iaer)
     free(mie_lrad_max[n]);
     free(mie_lrad_stp[n]);
   }
+  free(mie_wlen);
   free(mie_wlen_um);
   free(mie_aext);
   free(mie_asca);
   free(mie_asym);
+  free(mie_angl);
   free(mie_angl_rad);
   free(mie_angl_sin);
   free(mie_angl_cos);
@@ -2802,6 +2806,9 @@ int SetMie2(int iaer)
   free(mie_phs1);
   free(mie_phs2);
   free(mie_phas);
+  mie_n_wlen = NODATA;
+  mie_n_angl = NODATA;
+  mie_n_comp = NODATA;
 
   return 0;
 }
