@@ -1666,7 +1666,9 @@ int MieInit(void)
     return -1;
   }
 
-  if((mie_n_comp=ReadComp(iaer,MIE_MAXCOMP,mie_wcom_com,mie_rmod_com,mie_lsgm_com,mie_refr_com,mie_refi_com)) <= 0)
+  if((mie_n_comp=ReadComp(mie_aers_cmp[iaer],MIE_MAXCOMP,
+                          mie_wcom_com,mie_rmod_com,mie_lsgm_com,
+                          mie_refr_com,mie_refi_com)) <= 0)
   {
     return -1;
   }
@@ -5521,65 +5523,6 @@ int ReadConfig(void)
     } else
     if(strcasecmp(str[0],"mie_wlen") == 0)
     {
-      num = 0;
-      uni = 1.0;
-      mie_wlen_min = MIE_WLEN_MIN;
-      mie_wlen_max = MIE_WLEN_MAX;
-      if(n > 2)
-      {
-        errno = 0;
-        num = strtol(str[2],&p,10);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 3)
-      {
-        errno = 0;
-        uni = strtod(str[3],&p);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 4)
-      {
-        errno = 0;
-        mie_wlen_min = strtod(str[4],&p);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 5)
-      {
-        errno = 0;
-        mie_wlen_max = strtod(str[5],&p);
-        if(errno==ERANGE || *p!='\0')
-        {
-          fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 1)
-      {
-        if(strcmp(str[1],NONAME) != 0)
-        {
-          if((mie_n_wlen=Read1A(str[1],MIE_MAXDATA,num,uni,WaveSelect,mie_wlen)) < 1)
-          {
-            err = 1;
-            break;
-          }
-        }
-      }
       if(cnt_hp && cnt_n_cmnt<CNT_MAXCMNT)
       {
         snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s %4d %13.6e %13.4f %13.4f\n",
@@ -5979,7 +5922,95 @@ int AnglSelect(double *a)
   }
 }
 
-int ReadComp(int iaer,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi)
+int ReadWlen(char *s,int size,**wlen)
+{
+  int i,j,n;
+  int nc,ns;
+  int n_wlen = 0;
+  char line[MAXLINE];
+  char str[MAXITEM][MAXLINE];
+  char fnam[] = "ReadWlen";
+  char *p;
+  FILE *fp;
+
+  num = 0;
+  uni = 1.0;
+  mie_wlen_min = MIE_WLEN_MIN;
+  mie_wlen_max = MIE_WLEN_MAX;
+  for(ns=nc=0,p=s; ns<MAXITEM; ns++,p+=nc)
+  {
+    if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
+  }
+  if(strcasecmp(str[0],"mie_cmp") != 0)
+  {
+    fprintf(stderr,"%s: error in input >>> %s\n",fnam,s);
+    return -1;
+  } else
+  if(ns < 2)
+  {
+    fprintf(stderr,"%s: error, ns=%d (%s)\n",fnam,ns,s);
+    return -1;
+  }
+  if(ns > 2)
+  {
+    errno = 0;
+    num = strtol(str[2],&p,10);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
+      err = 1;
+      break;
+    }
+  }
+  if(ns > 3)
+  {
+    errno = 0;
+    uni = strtod(str[3],&p);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
+      err = 1;
+      break;
+    }
+  }
+  if(ns > 4)
+  {
+    errno = 0;
+    mie_wlen_min = strtod(str[4],&p);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
+      err = 1;
+      break;
+    }
+  }
+  if(ns > 5)
+  {
+    errno = 0;
+    mie_wlen_max = strtod(str[5],&p);
+    if(errno==ERANGE || *p!='\0')
+    {
+      fprintf(stderr,"%s: convert error >>> %s\n",fnam,line);
+      err = 1;
+      break;
+    }
+  }
+  if(ns > 1)
+  {
+    if(strcmp(str[1],NONAME) != 0)
+    {
+      if((n_wlen=Read1P(str[1],size,num,uni,WaveSelect,wlen)) < 1)
+      {
+        err = 1;
+        break;
+      }
+    }
+  }
+
+  return n_wlen;
+}
+
+int ReadComp(char *s,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi)
 {
   int i,j,n;
   int nc,ns;
@@ -5996,10 +6027,9 @@ int ReadComp(int iaer,int size,double *wcom,double *rmod,double *lsgm,double **r
   char line[MAXLINE];
   char str[MAXITEM][MAXLINE];
   char fnam[] = "ReadComp";
-  char *s,*p;
+  char *p;
   FILE *fp;
 
-  s = mie_aers_cmp[iaer];
   for(ns=nc=0,p=s; ns<MAXITEM; ns++,p+=nc)
   {
     if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
