@@ -45,6 +45,9 @@
 // Constants for Simulation
 #define SIM_MODTRAN                     'M'                     // MODTRAN band model
 #define SIM_SPEED                       'M'                     // Simulation speed
+#define	SIM_N_AEROSOL			4			// #Aerosols for simulation
+#define	SIM_N_AERS_WLEN			11			// #Wavelengths for extinction
+#define	SIM_MAX_AERS_WLEN		788			// Max #wavelengths for extinction
 #define	SIM_N_PHAS_WLEN			11			// #Wavelengths for phase function
 #define	SIM_MAX_PHASE_WLEN		15			// Max #wavelengths for phase function
 #define	SIM_N_PHAS_ANGL			50			// #Angles
@@ -99,6 +102,8 @@
 #define	SIM_DMAX			1.0e4			// Max wavelength difference in nm
 #define	SIM_WLEN_MIN			350.0			// Min wavelength in nm
 #define	SIM_WLEN_MAX			1050.0			// Max wavelength in nm
+#define	SIM_ANGL_MIN			0.0			// Min angle in degree
+#define	SIM_ANGL_MAX			180.0			// Max angle in degree
 #define	SIM_TH_SUN			20.0			// Solar zenith
 #define	SIM_PH_SUN			0.0			// Solar azimuth (N=0,CW)
 #define	SIM_TH_LOS			0.0			// LOS zenith
@@ -140,7 +145,7 @@
 #define	PRF_MOL_NO2			9
 #define	PRF_MOL_NH3			10
 #define	PRF_MOL_HNO3			11
-#define	PRF_NHAZ			4
+#define	PRF_NHAZ			SIM_N_AEROSOL
 #define	PRF_NHAZ_LOW			2
 #define	PRF_NPAR			14
 // Constants for Mie calculation
@@ -158,7 +163,7 @@
 #define	MIE_SHAPE_SPHEROID		'T'
 #define	MIE_N_WLEN			11			// #Wavelengths
 #define	MIE_N_ANGL			121			// #Angles
-#define	MIE_MAXDATA			2000			// Max #data
+#define	MIE_MAXDATA			10000			// Max #data
 #define	MIE_DMAX			1000000			// Max #data for size dist
 #define	MIE_IMIN			0			// Min line#
 #define	MIE_IMAX			1000000000		// Min line#
@@ -401,6 +406,9 @@ char	sim_prf_jcharx;
 char	sim_prf_jchary;
 char	sim_fsun[MAXLINE]		= NONAME;		// TOA solar irradiance file
 char	sim_falb[MAXLINE]		= SIM_FALB;		// Spectral albedo file
+char	sim_aers_wav[SIM_N_AEROSOL][MAXLINE] = {"\0","\0","\0","\0"};// Wavelength settings for extinction
+char	sim_phas_wav[MAXLINE]		= "\0";			// Wavelength settings for phase function
+char	sim_phas_ang[MAXLINE]		= "\0";			// Angle settings for phase function
 // Parameters for MODTRAN
 char	mod_path_v4[MAXLINE]		= MOD_PATH_V4;		// MODTRAN4 path
 char	mod_path_v5[MAXLINE]		= MOD_PATH_V5;		// MODTRAN5 path
@@ -527,14 +535,14 @@ double	*mie_lrad_stp[MIE_MAXCOMP];				// Log10(R) step
 double	mie_rmin			= MIE_RMIN;		// R min in um
 double	mie_rmax			= MIE_RMAX;		// R max in um
 double	mie_wsgm			= MIE_WSGM;		// Log10(R) width in sigma
-char	mie_aers_wav[4][MAXLINE]	= {"\0","\0","\0","\0"};// Wavelength settings for Mie calculation
-char	mie_aers_ang[4][MAXLINE]	= {"\0","\0","\0","\0"};// Angle settings for Mie calculation
-char	mie_aers_cmp[4][MAXLINE]	= {"\0","\0","\0","\0"};// Parameters for ReadComp
-char	mie_aers_inp1[4][MAXLINE]	= {"\0","\0","\0","\0"};// Input file 1
-char	mie_aers_inp2[4][MAXLINE]	= {"\0","\0","\0","\0"};// Input file 2
 char	mie_out0[MAXLINE]		= MIE_OUT0;		// Output file 0
 char	mie_out1[MAXLINE]		= MIE_OUT1;		// Output file 1
 char	mie_out2[MAXLINE]		= MIE_OUT2;		// Output file 2
+char	mie_aers_wav[SIM_N_AEROSOL][MAXLINE] = {"\0","\0","\0","\0"};// Wavelength settings for Mie calculation
+char	mie_aers_ang[SIM_N_AEROSOL][MAXLINE] = {"\0","\0","\0","\0"};// Angle settings for Mie calculation
+char	mie_aers_cmp[SIM_N_AEROSOL][MAXLINE] = {"\0","\0","\0","\0"};// Parameters for ReadComp
+char	mie_aers_inp1[SIM_N_AEROSOL][MAXLINE] = {"\0","\0","\0","\0"};// Input file 1
+char	mie_aers_inp2[SIM_N_AEROSOL][MAXLINE] = {"\0","\0","\0","\0"};// Input file 2
 // Parameters for T-matrix calculation
 int	tmx_ndis			= TMX_NDIS;		// Distribution#
 int	tmx_nang			= TMX_NANG;		// #Angles
@@ -4430,48 +4438,75 @@ int ReadConfig(void)
         cnt_n_cmnt++;
       }
     } else
-    if(strcasecmp(str[0],"sim_phas_wlen") == 0)
+    if(strcasecmp(str[0],"sim_aer1_wav") == 0)
     {
-      num = 0;
-      uni = 1.0;
-      if(n > 2)
+      if(n > 1) // str[1] must be the file name
       {
-        errno = 0;
-        ntmp = strtol(str[2],&p,10);
-        if(errno!=ERANGE && *p=='\0' && ntmp>=0) num = ntmp;
-        else
-        {
-          fprintf(stderr,"%s: out of range >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 3)
-      {
-        errno = 0;
-        xtmp = strtod(str[3],&p);
-        if(errno!=ERANGE && *p=='\0') uni = xtmp;
-        else
-        {
-          fprintf(stderr,"%s: out of range >>> %s\n",fnam,line);
-          err = 1;
-          break;
-        }
-      }
-      if(n > 1)
-      {
-        if(strcmp(str[1],NONAME) != 0)
-        {
-          if((sim_n_phas_wlen=Read1A(str[1],SIM_MAX_PHAS_WLEN,num,uni,NULL,sim_phas_wlen)) < 1)
-          {
-            err = 1;
-            break;
-          }
-        }
+        snprintf(sim_aers_wav[0],MAXLINE,"%s",temp);
       }
       if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
       {
-        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s %4d %13.6e\n",str[0],str[1],num,uni);
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"sim_aer2_wav") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(sim_aers_wav[1],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"sim_aer3_wav") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(sim_aers_wav[2],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"sim_aer4_wav") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(sim_aers_wav[3],MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"sim_phas_wav") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(sim_phas_wav,MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
+        cnt_n_cmnt++;
+      }
+    } else
+    if(strcasecmp(str[0],"sim_phas_ang") == 0)
+    {
+      if(n > 1) // str[1] must be the file name
+      {
+        snprintf(sim_phas_ang,MAXLINE,"%s",temp);
+      }
+      if(cnt_hp && n>1 && cnt_n_cmnt<CNT_MAXCMNT)
+      {
+        snprintf(cnt_cmnt[cnt_n_cmnt],MAXLINE,"%-14s: %30s\n",str[0],temp);
         cnt_n_cmnt++;
       }
     } else
@@ -8189,7 +8224,18 @@ int Usage(void)
   fprintf(stderr,"sim_prnt      value        | NOPRNT flag(%d)\n",SIM_PRNT);
   fprintf(stderr,"sim_wlen_min  value unit   | min wlen(%.1f),unit in nm(%.1f)\n",SIM_WLEN_MIN,1.0);
   fprintf(stderr,"sim_wlen_max  value unit   | max wlen(%.1f),unit in nm(%.1f)\n",SIM_WLEN_MAX,1.0);
-  fprintf(stderr,"sim_phas_wlen name # unit  | wlen for pfunc(%s),wlen column#(%d),unit in nm(%.1f)\n",NONAME,0,1.0);
+  fprintf(stderr,"sim_aer1_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,SIM_WLEN_MIN,SIM_WLEN_MAX);
+  fprintf(stderr,"sim_aer2_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,SIM_WLEN_MIN,SIM_WLEN_MAX);
+  fprintf(stderr,"sim_aer3_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,SIM_WLEN_MIN,SIM_WLEN_MAX);
+  fprintf(stderr,"sim_aer4_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,SIM_WLEN_MIN,SIM_WLEN_MAX);
+  fprintf(stderr,"sim_phas_wav name # u m M  | file name(%s),wlen column#(%d),unit in nm(%.1f),min wlen(%.1f),max wlen(%.1f)\n",
+                                               NONAME,0,1.0,SIM_WLEN_MIN,SIM_WLEN_MAX);
+  fprintf(stderr,"sim_phas_ang name # u m M  | file name(%s),angl column#(%d),deg or rad(%s),min angl(%5.1f),max angl(%6.1f)\n",
+                                               NONAME,0,"deg",SIM_ANGL_MIN,SIM_ANGL_MAX);
   fprintf(stderr,"sim_dmax      value        | max wlen difference in nm(%.1f)\n",SIM_DMAX);
   fprintf(stderr,"sim_th_sun    value        | solar zenith  in deg(%.1f)\n",SIM_TH_SUN);
   fprintf(stderr,"sim_ph_sun    value        | solar azimuth in deg(%.1f)\n",SIM_PH_SUN);
