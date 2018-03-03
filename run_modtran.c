@@ -267,7 +267,7 @@ int ReadConfig(void);
 int PostConfig(void);
 int WaveSelect(double *w);
 int AnglSelect(double *a);
-int ReadComp(int iaer,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi);
+int ReadComp(char *s,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi);
 int Read1A(char *s,int size,int cx,double ux,int (*func)(double*),double *x);
 int Read2A(char *s,int size,int cx,int cy,double ux,double uy,int (*func)(double*),double *x,double *y);
 int Read3A(char *s,int size,int cx,int cy,int cz,double ux,double uy,double uz,
@@ -6140,7 +6140,8 @@ int ReadComp(char *s,int size,double *wcom,double *rmod,double *lsgm,double **re
   {
     if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
   }
-  if(strcasecmp(str[0],"mie_cmp") != 0)
+  str[0][7] = 's';
+  if(strcasecmp(str[0],"mie_aers_cmp") != 0)
   {
     fprintf(stderr,"%s: error in input >>> %s\n",fnam,s);
     return -1;
