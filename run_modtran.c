@@ -49,9 +49,9 @@
 #define	SIM_N_AERS_WLEN			11			// #Wavelengths for extinction
 #define	SIM_MAX_AERS_WLEN		788			// Max #wavelengths for extinction
 #define	SIM_N_PHAS_WLEN			11			// #Wavelengths for phase function
-#define	SIM_MAX_PHASE_WLEN		15			// Max #wavelengths for phase function
+#define	SIM_MAX_PHAS_WLEN		15			// Max #wavelengths for phase function
 #define	SIM_N_PHAS_ANGL			50			// #Angles
-#define	SIM_MAX_PHASE_ANGL		51			// Max #angles for phase function
+#define	SIM_MAX_PHAS_ANGL		51			// Max #angles for phase function
 #define	SIM_MAXNDIR			1000			// Max #directions
 #define	SIM_MAXDATA			50000			// #Data
 #define	SIM_MAXCONV			10000			// #Data
@@ -272,8 +272,8 @@ int ReadConfig(void);
 int PostConfig(void);
 int WaveSelect(double *w);
 int AnglSelect(double *a);
-int ReadWlen(char *s,int size,**wlen);
-int ReadAngl(char *s,int size,**angl);
+int ReadWlen(char *s,int size,double **wlen);
+int ReadAngl(char *s,int size,double **angl);
 int ReadComp(char *s,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi);
 int Read1A(char *s,int size,int cx,double ux,int (*func)(double*),double *x);
 int Read2A(char *s,int size,int cx,int cy,double ux,double uy,int (*func)(double*),double *x,double *y);
@@ -1615,7 +1615,7 @@ int Init(void)
       sim_aers_phas[i] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
       if(sim_aers_phas[i] == NULL)
       {
-        fprintf(stderr,"%s: failed in allocating memory for %s\n",fnam,sim_aers_phas);
+        fprintf(stderr,"%s: failed in allocating memory for %s\n",fnam,"sim_aers_phas");
         return -1;
       }
     }
@@ -3094,19 +3094,19 @@ int upper_pfunc(int iaer)
         Interp2D(upp_wlen,upp_angl,upp_tropo_phas[i_1],UPP_N_WLEN,UPP_N_ANGL,
                  mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,-2222);
       }
-      break
+      break;
     case 2:
       Interp2D(upp_wlen,upp_angl,upp_strat_phas,UPP_N_WLEN,UPP_N_ANGL,
                mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,-2222);
-      break
+      break;
     case 3:
       Interp2D(upp_wlen,upp_angl,upp_meteo_phas,UPP_N_WLEN,UPP_N_ANGL,
                mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,-2222);
-      break
+      break;
     default:
       fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
       return -1;
-      break
+      break;
   }
 
   for(i=0; i<mie_n_wlen; i++)
@@ -6104,7 +6104,7 @@ int AnglSelect(double *a)
   }
 }
 
-int ReadWlen(char *s,int size,**wlen)
+int ReadWlen(char *s,int size,double **wlen)
 {
   int nc,ns;
   int num;
@@ -6196,7 +6196,7 @@ int ReadWlen(char *s,int size,**wlen)
   return n_wlen;
 }
 
-int ReadAngl(char *s,int size,**angl)
+int ReadAngl(char *s,int size,double **angl)
 {
   int nc,ns;
   int num;
