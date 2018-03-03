@@ -237,7 +237,7 @@ int Init(void);
 void Finish(void);
 int GetOpt(int argn,char **args);
 int Usage(void);
-int MieInit(void);
+int MieInit(int iaer);
 int MieTable(int n1,int n2);
 int MieCalc(void);
 int MixComp(void);
@@ -272,6 +272,8 @@ int ReadConfig(void);
 int PostConfig(void);
 int WaveSelect(double *w);
 int AnglSelect(double *a);
+int ReadWlen(char *s,int size,**wlen);
+int ReadAngl(char *s,int size,**angl);
 int ReadComp(char *s,int size,double *wcom,double *rmod,double *lsgm,double **refr,double **refi);
 int Read1A(char *s,int size,int cx,double ux,int (*func)(double*),double *x);
 int Read2A(char *s,int size,int cx,int cy,double ux,double uy,int (*func)(double*),double *x,double *y);
@@ -373,15 +375,15 @@ double	sim_phas_angl_default[SIM_N_PHAS_ANGL] =
   176.0, 180.0,
 };
 double	*sim_dir[4]			= {NULL,NULL,NULL,NULL};
-double	*sim_aers_wlen[4]		= {NULL,NULL,NULL,NULL};
-double	*sim_aers_wlen_um[4]		= {NULL,NULL,NULL,NULL};
-double	*sim_aers_cext[4]		= {NULL,NULL,NULL,NULL};
-double	*sim_aers_cabs[4]		= {NULL,NULL,NULL,NULL};
-double	*sim_aers_asym[4]		= {NULL,NULL,NULL,NULL};
+double	*sim_aers_wlen[SIM_N_AEROSOL]	= {NULL,NULL,NULL,NULL};
+double	*sim_aers_wlen_um[SIM_N_AEROSOL]= {NULL,NULL,NULL,NULL};
+double	*sim_aers_cext[SIM_N_AEROSOL]	= {NULL,NULL,NULL,NULL};
+double	*sim_aers_cabs[SIM_N_AEROSOL]	= {NULL,NULL,NULL,NULL};
+double	*sim_aers_asym[SIM_N_AEROSOL]	= {NULL,NULL,NULL,NULL};
 double	*sim_phas_wlen			= NULL;
 double	*sim_phas_wlen_um		= NULL;
 double	*sim_phas_angl			= NULL;
-double	*sim_aers_phas[4]		= {NULL,NULL,NULL,NULL};
+double	*sim_aers_phas[SIM_N_AEROSOL]	= {NULL,NULL,NULL,NULL};
 double	sim_wlen_min			= SIM_WLEN_MIN;		// Min wavelength in nm
 double	sim_wlen_max			= SIM_WLEN_MAX;		// Max wavelength in nm
 double	sim_th_sun			= SIM_TH_SUN;		// Solar zenith
@@ -835,7 +837,7 @@ int main(int argc,char **argv)
      sim_mode==SIM_MODE_SSR_CUSTOM_BO ||
      sim_mode==SIM_MODE_TRN_CUSTOM_BO)
   {
-    for(i=0; i<4; i++)
+    for(i=0; i<SIM_N_AEROSOL; i++)
     {
       if(mie_aers_cmp[i][0] != '\0')
       {
@@ -1478,13 +1480,14 @@ int main(int argc,char **argv)
 
 int Init(void)
 {
-  int i;
+  int i,j;
+  char fnam[] = "Init";
 
   if(dsr_n_wlen > 0)
   {
     if((dsr_dsim=(double*)malloc(dsr_n_wlen*sizeof(double))) == NULL)
     {
-      fprintf(stderr,"Error in allocating memory for %s\n","dsr_dsim");
+      fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"dsr_dsim");
       return -1;
     }
   }
@@ -1494,7 +1497,7 @@ int Init(void)
     {
       if((ssr_sbmp=(int*)malloc(ssr_n_wlen*sizeof(int))) == NULL)
       {
-        fprintf(stderr,"Error in allocating memory for %s\n","ssr_sbmp");
+        fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"ssr_sbmp");
         return -1;
       }
       for(i=0; i<ssr_n_wlen; i++)
@@ -1505,14 +1508,14 @@ int Init(void)
     } else
     if(ssr_n_sbmp != ssr_n_wlen)
     {
-      fprintf(stderr,"Error, ssr_n_sbmp=%d, ssr_n_wlen=%d\n",ssr_n_sbmp,ssr_n_wlen);
+      fprintf(stderr,"%s: error, ssr_n_sbmp=%d, ssr_n_wlen=%d\n",fnam,ssr_n_sbmp,ssr_n_wlen);
       return -1;
     }
     if(ssr_n_nsam == 0)
     {
       if((ssr_nsam=(int*)malloc(ssr_n_wlen*sizeof(int))) == NULL)
       {
-        fprintf(stderr,"Error in allocating memory for %s\n","ssr_nsam");
+        fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"ssr_nsam");
         return -1;
       }
       for(i=0; i<ssr_n_wlen; i++)
@@ -1523,12 +1526,91 @@ int Init(void)
     } else
     if(ssr_n_nsam != ssr_n_wlen)
     {
-      fprintf(stderr,"Error, ssr_n_nsam=%d, ssr_n_wlen=%d\n",ssr_n_nsam,ssr_n_wlen);
+      fprintf(stderr,"%s: error, ssr_n_nsam=%d, ssr_n_wlen=%d\n",fnam,ssr_n_nsam,ssr_n_wlen);
       return -1;
     }
     if((ssr_dsim=(double*)malloc(ssr_n_wlen*sizeof(double))) == NULL)
     {
-      fprintf(stderr,"Error in allocating memory for %s\n","ssr_dsim");
+      fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"ssr_dsim");
+      return -1;
+    }
+  }
+
+  // sim_aers_wlen
+  for(i=0; i<SIM_N_AEROSOL; i++)
+  {
+    if((sim_n_aers_wlen[i]=ReadWlen(sim_aers_wav[i],SIM_MAX_AERS_WLEN,&sim_aers_wlen[i])) < 0)
+    {
+      if((sim_aers_wlen[i]=(double*)malloc(SIM_N_AERS_WLEN*sizeof(double))) == NULL)
+      {
+        fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_aers_wlen");
+        return -1;
+      }
+      sim_n_aers_wlen[i] = SIM_N_AERS_WLEN;
+      for(j=0; j<sim_n_aers_wlen[i]; j++)
+      {
+        sim_aers_wlen[i][j] = sim_aers_wlen_default[j];
+      }
+    }
+    sim_aers_wlen_um[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
+    sim_aers_cext[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
+    sim_aers_cabs[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
+    sim_aers_asym[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
+    if(sim_aers_wlen_um[i]==NULL || sim_aers_cext[i]==NULL ||
+       sim_aers_cabs[i]==NULL || sim_aers_asym[i]==NULL)
+    {
+      fprintf(stderr,"%s: failed in allocating memory\n",fnam);
+      return -1;
+    }
+    for(j=0; j<sim_n_aers_wlen[i]; j++)
+    {
+      sim_aers_wlen_um[i][j] = sim_aers_wlen[i][j]*1.0e-3;
+    }
+  }
+  // sim_phas_wlen
+  if((sim_n_phas_wlen=ReadWlen(sim_phas_wav,SIM_MAX_PHAS_WLEN,&sim_phas_wlen)) < 0)
+  {
+    if((sim_phas_wlen=(double*)malloc(SIM_N_PHAS_WLEN*sizeof(double))) == NULL)
+    {
+      fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_phas_wlen");
+      return -1;
+    }
+    sim_n_phas_wlen = SIM_N_PHAS_WLEN;
+    for(j=0; j<sim_n_phas_wlen; j++)
+    {
+      sim_phas_wlen[j] = sim_phas_wlen_default[j];
+    }
+  }
+  sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
+  if(sim_phas_wlen_um == NULL)
+  {
+    fprintf(stderr,"%s: failed in allocating memory for %s\n",fnam,"sim_phas_wlen_um");
+    return -1;
+  }
+  for(j=0; j<sim_n_phas_wlen; j++)
+  {
+    sim_phas_wlen_um[j] = sim_phas_wlen[j]*1.0e-3;
+  }
+  // sim_phas_angl
+  if((sim_n_phas_angl=ReadAngl(sim_phas_ang,SIM_MAX_PHAS_ANGL,&sim_phas_angl)) < 0)
+  {
+    if((sim_phas_angl=(double*)malloc(SIM_N_PHAS_ANGL*sizeof(double))) == NULL)
+    {
+      fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_phas_angl");
+      return -1;
+    }
+    sim_n_phas_angl = SIM_N_PHAS_ANGL;
+    for(j=0; j<sim_n_phas_angl; j++)
+    {
+      sim_phas_angl[j] = sim_phas_angl_default[j];
+    }
+  }
+  for(i=0; i<SIM_N_AEROSOL; i++)
+  {
+    sim_aers_phas[i] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
+    if(sim_aers_phas[i] == NULL)
+    {
+      fprintf(stderr,"%s: failed in allocating memory for %s\n",fnam,sim_aers_phas);
       return -1;
     }
   }
@@ -1553,22 +1635,6 @@ void Finish(void)
   int err = 0;
 
   // Deallocate memories
-  free(sim_phas_wlen_um);
-  for(i=0; i<4; i++)
-  {
-    free(sim_aers_wlen_um[i]);
-    free(sim_aers_cext[i]);
-    free(sim_aers_cabs[i]);
-    free(sim_aers_asym[i]);
-    free(sim_aers_phas[i]);
-  }
-  if(sim_n_dir > 0)
-  {
-    free(sim_dir[0]);
-    free(sim_dir[1]);
-    free(sim_dir[2]);
-    free(sim_dir[3]);
-  }
   if(dsr_wlen != NULL)
   {
     free(dsr_wlen);
@@ -1593,6 +1659,25 @@ void Finish(void)
   {
     free(ssr_sbmp);
     ssr_sbmp = NULL;
+  }
+  if(sim_n_dir > 0)
+  {
+    free(sim_dir[0]);
+    free(sim_dir[1]);
+    free(sim_dir[2]);
+    free(sim_dir[3]);
+  }
+  free(sim_phas_wlen);
+  free(sim_phas_wlen_um);
+  free(sim_phas_angl);
+  for(i=0; i<SIM_N_AEROSOL; i++)
+  {
+    free(sim_aers_wlen[i]);
+    free(sim_aers_wlen_um[i]);
+    free(sim_aers_cext[i]);
+    free(sim_aers_cabs[i]);
+    free(sim_aers_asym[i]);
+    free(sim_aers_phas[i]);
   }
 
   // Cleanup files
@@ -1631,7 +1716,7 @@ void Finish(void)
   return;
 }
 
-int MieInit(void)
+int MieInit(int iaer)
 {
   int i,j,n;
   char fnam[] = "MieInit";
@@ -2735,6 +2820,10 @@ int ReadMie(int iaer)
 
 int SetMie1(int iaer)
 {
+  int i;
+  double *cext = NULL;
+  double *cabs = NULL;
+  double *asym = NULL;
   char fnam[] = "SetMie1";
 
   if(iaer<0 || iaer>3)
@@ -2742,31 +2831,43 @@ int SetMie1(int iaer)
     fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
     return -1;
   }
-  sim_n_aers_wlen[iaer] = mie_n_wlen;
-  sim_aers_wlen_um[iaer] = (double *)malloc(sim_n_aers_wlen[iaer]*sizeof(double));
-  sim_aers_cext[iaer] = (double *)malloc(sim_n_aers_wlen[iaer]*sizeof(double));
-  sim_aers_cabs[iaer] = (double *)malloc(sim_n_aers_wlen[iaer]*sizeof(double));
-  sim_aers_asym[iaer] = (double *)malloc(sim_n_aers_wlen[iaer]*sizeof(double));
-  if(sim_aers_wlen_um[iaer]==NULL || sim_aers_cext[iaer]==NULL ||
-     sim_aers_cabs[iaer]==NULL || sim_aers_asym[iaer]==NULL)
+  cext = (double*)malloc(mie_n_wlen*sizeof(double));
+  cabs = (double*)malloc(mie_n_wlen*sizeof(double));
+  if(cext==NULL || cabs==NULL)
   {
-    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
+    fprintf(stderr,"%s: error in allocating memory.\n",fnam);
     return -1;
   }
-  for(i=0; i<sim_n_aers_wlen[iaer]; i++)
+  for(i=0; i<mie_n_wlen; i++)
   {
-    sim_aers_wlen_um[i] = mie_wlen_um[i];
-    sim_aers_cext[i] = mie_aext[i]/mie_aext[mie_iref];
-    sim_aers_cabs[i] = (mie_aext[i]-mie_asca[i])/mie_aext[mie_iref];
-    sim_aers_asym[i] = mie_asym[i];
+    cext[i] = mie_aext[i]/mie_aext[mie_iref];
+    cabs[i] = (mie_aext[i]-mie_asca[i])/mie_aext[mie_iref];
   }
+  asym = mie_asym;
+  if(Sampling(mie_n_wlen,mie_wlen,cext,
+              sim_n_aers_wlen[iaer],sim_aers_wlen[iaer],sim_aers_cext[iaer],1.0) < 0)
+  {
+    return -1;
+  }
+  if(Sampling(mie_n_wlen,mie_wlen,cabs,
+              sim_n_aers_wlen[iaer],sim_aers_wlen[iaer],sim_aers_cabs[iaer],1.0) < 0)
+  {
+    return -1;
+  }
+  if(Sampling(mie_n_wlen,mie_wlen,asym,
+              sim_n_aers_wlen[iaer],sim_aers_wlen[iaer],sim_aers_asym[iaer],1.0) < 0)
+  {
+    return -1;
+  }
+  free(cext);
+  free(cabs);
 
   return 0;
 }
 
 int SetMie2(int iaer)
 {
-  int n;
+  int i,n;
   char fnam[] = "SetMie2";
 
   if(iaer<0 || iaer>3)
@@ -2774,19 +2875,6 @@ int SetMie2(int iaer)
     fprintf(stderr,"%s: error, iaer=%d\n",fnam,iaer);
     return -1;
   }
-
-  sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
-  sim_aers_phas[iaer] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-  if(sim_phas_wlen_um==NULL || sim_aers_phas[iaer]==NULL)
-  {
-    fprintf(stderr,"%s: failed in allocating memory\n",fnam);
-    return -1;
-  }
-  for(i=0; i<sim_n_phas_wlen; i++)
-  {
-    sim_phas_wlen_um[i] = sim_phas_wlen[i]*1.0e-3;
-  }
-
   if(Interp2D(mie_wlen,mie_angl,mie_phas,mie_n_wlen,mie_n_angl,
               sim_phas_wlen,sim_phas_angl,sim_aers_phas[iaer],sim_n_phas_wlen,sim_n_phas_angl,-1111) < 0)
   {
@@ -5979,6 +6067,10 @@ int ReadWlen(char *s,int size,**wlen)
   char fnam[] = "ReadWlen";
   char *p;
 
+  if(strcmp(s,"")==0 || strcmp(s,NONAME)==0)
+  {
+    return -1;
+  }
   num = 0;
   uni = 1.0;
   mie_wlen_min = MIE_WLEN_MIN;
@@ -5988,7 +6080,7 @@ int ReadWlen(char *s,int size,**wlen)
     if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
   }
   str[0][7] = 's';
-  if(strcasecmp(str[0],"mie_aers_wav") != 0)
+  if(strcasecmp(&str[0][8],"_wav") != 0)
   {
     fprintf(stderr,"%s: error in input >>> %s\n",fnam,s);
     return -1;
@@ -6067,6 +6159,10 @@ int ReadAngl(char *s,int size,**angl)
   char fnam[] = "ReadAngl";
   char *p;
 
+  if(strcmp(s,"")==0 || strcmp(s,NONAME)==0)
+  {
+    return -1;
+  }
   num = 0;
   uni = 1.0;
   mie_angl_min = MIE_ANGL_MIN;
@@ -6076,7 +6172,7 @@ int ReadAngl(char *s,int size,**angl)
     if(sscanf(p,"%s%n",str[ns],&nc) == EOF) break;
   }
   str[0][7] = 's';
-  if(strcasecmp(str[0],"mie_aers_ang") != 0)
+  if(strcasecmp(&str[0][8],"_ang") != 0)
   {
     fprintf(stderr,"%s: error in input >>> %s\n",fnam,s);
     return -1;
