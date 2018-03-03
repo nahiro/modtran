@@ -309,7 +309,7 @@ double	*ssr_dsim			= NULL;			// Simulation data
 char    sim_modtran                     = SIM_MODTRAN;          // MODTRAN band model
 char    sim_speed                       = SIM_SPEED;            // Simulation speed
 int	sim_mode			= SIM_MODE_DSR_MODTRAN_BO; // Simulation mode
-int	sim_n_aers_wlen[4]		= {NODATA,NODATA,NODATA,NODATA}; // #Wavelengths for cext, etc.
+int	sim_n_aers_wlen[SIM_N_AEROSOL]	= {NODATA,NODATA,NODATA,NODATA}; // #Wavelengths for cext, etc.
 int	sim_n_phas_wlen			= NODATA;		// #Wavelengths for phase function
 int	sim_n_phas_angl			= NODATA;		// #Angles
 int	sim_n_dir			= NODATA;		// #Directions
@@ -1536,82 +1536,88 @@ int Init(void)
     }
   }
 
-  // sim_aers_wlen
-  for(i=0; i<SIM_N_AEROSOL; i++)
+  if(sim_mode==SIM_MODE_DSR_CUSTOM_BO ||
+     sim_mode==SIM_MODE_SSR_CUSTOM_SO ||
+     sim_mode==SIM_MODE_SSR_CUSTOM_BO ||
+     sim_mode==SIM_MODE_TRN_CUSTOM_BO)
   {
-    if((sim_n_aers_wlen[i]=ReadWlen(sim_aers_wav[i],SIM_MAX_AERS_WLEN,&sim_aers_wlen[i])) < 0)
+    // sim_aers_wlen
+    for(i=0; i<SIM_N_AEROSOL; i++)
     {
-      if((sim_aers_wlen[i]=(double*)malloc(SIM_N_AERS_WLEN*sizeof(double))) == NULL)
+      if((sim_n_aers_wlen[i]=ReadWlen(sim_aers_wav[i],SIM_MAX_AERS_WLEN,&sim_aers_wlen[i])) < 0)
       {
-        fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_aers_wlen");
+        if((sim_aers_wlen[i]=(double*)malloc(SIM_N_AERS_WLEN*sizeof(double))) == NULL)
+        {
+          fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_aers_wlen");
+          return -1;
+        }
+        sim_n_aers_wlen[i] = SIM_N_AERS_WLEN;
+        for(j=0; j<sim_n_aers_wlen[i]; j++)
+        {
+          sim_aers_wlen[i][j] = sim_aers_wlen_default[j];
+        }
+      }
+      sim_aers_wlen_um[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
+      sim_aers_cext[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
+      sim_aers_cabs[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
+      sim_aers_asym[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
+      if(sim_aers_wlen_um[i]==NULL || sim_aers_cext[i]==NULL ||
+         sim_aers_cabs[i]==NULL || sim_aers_asym[i]==NULL)
+      {
+        fprintf(stderr,"%s: failed in allocating memory\n",fnam);
         return -1;
       }
-      sim_n_aers_wlen[i] = SIM_N_AERS_WLEN;
       for(j=0; j<sim_n_aers_wlen[i]; j++)
       {
-        sim_aers_wlen[i][j] = sim_aers_wlen_default[j];
+        sim_aers_wlen_um[i][j] = sim_aers_wlen[i][j]*1.0e-3;
       }
     }
-    sim_aers_wlen_um[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
-    sim_aers_cext[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
-    sim_aers_cabs[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
-    sim_aers_asym[i] = (double *)malloc(sim_n_aers_wlen[i]*sizeof(double));
-    if(sim_aers_wlen_um[i]==NULL || sim_aers_cext[i]==NULL ||
-       sim_aers_cabs[i]==NULL || sim_aers_asym[i]==NULL)
+    // sim_phas_wlen
+    if((sim_n_phas_wlen=ReadWlen(sim_phas_wav,SIM_MAX_PHAS_WLEN,&sim_phas_wlen)) < 0)
     {
-      fprintf(stderr,"%s: failed in allocating memory\n",fnam);
+      if((sim_phas_wlen=(double*)malloc(SIM_N_PHAS_WLEN*sizeof(double))) == NULL)
+      {
+        fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_phas_wlen");
+        return -1;
+      }
+      sim_n_phas_wlen = SIM_N_PHAS_WLEN;
+      for(j=0; j<sim_n_phas_wlen; j++)
+      {
+        sim_phas_wlen[j] = sim_phas_wlen_default[j];
+      }
+    }
+    sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
+    if(sim_phas_wlen_um == NULL)
+    {
+      fprintf(stderr,"%s: failed in allocating memory for %s\n",fnam,"sim_phas_wlen_um");
       return -1;
     }
-    for(j=0; j<sim_n_aers_wlen[i]; j++)
-    {
-      sim_aers_wlen_um[i][j] = sim_aers_wlen[i][j]*1.0e-3;
-    }
-  }
-  // sim_phas_wlen
-  if((sim_n_phas_wlen=ReadWlen(sim_phas_wav,SIM_MAX_PHAS_WLEN,&sim_phas_wlen)) < 0)
-  {
-    if((sim_phas_wlen=(double*)malloc(SIM_N_PHAS_WLEN*sizeof(double))) == NULL)
-    {
-      fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_phas_wlen");
-      return -1;
-    }
-    sim_n_phas_wlen = SIM_N_PHAS_WLEN;
     for(j=0; j<sim_n_phas_wlen; j++)
     {
-      sim_phas_wlen[j] = sim_phas_wlen_default[j];
+      sim_phas_wlen_um[j] = sim_phas_wlen[j]*1.0e-3;
     }
-  }
-  sim_phas_wlen_um = (double *)malloc(sim_n_phas_wlen*sizeof(double));
-  if(sim_phas_wlen_um == NULL)
-  {
-    fprintf(stderr,"%s: failed in allocating memory for %s\n",fnam,"sim_phas_wlen_um");
-    return -1;
-  }
-  for(j=0; j<sim_n_phas_wlen; j++)
-  {
-    sim_phas_wlen_um[j] = sim_phas_wlen[j]*1.0e-3;
-  }
-  // sim_phas_angl
-  if((sim_n_phas_angl=ReadAngl(sim_phas_ang,SIM_MAX_PHAS_ANGL,&sim_phas_angl)) < 0)
-  {
-    if((sim_phas_angl=(double*)malloc(SIM_N_PHAS_ANGL*sizeof(double))) == NULL)
+    // sim_phas_angl
+    if((sim_n_phas_angl=ReadAngl(sim_phas_ang,SIM_MAX_PHAS_ANGL,&sim_phas_angl)) < 0)
     {
-      fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_phas_angl");
-      return -1;
+      if((sim_phas_angl=(double*)malloc(SIM_N_PHAS_ANGL*sizeof(double))) == NULL)
+      {
+        fprintf(stderr,"%s: error in allocating memory for %s\n",fnam,"sim_phas_angl");
+        return -1;
+      }
+      sim_n_phas_angl = SIM_N_PHAS_ANGL;
+      for(j=0; j<sim_n_phas_angl; j++)
+      {
+        sim_phas_angl[j] = sim_phas_angl_default[j];
+      }
     }
-    sim_n_phas_angl = SIM_N_PHAS_ANGL;
-    for(j=0; j<sim_n_phas_angl; j++)
+    for(i=0; i<SIM_N_AEROSOL; i++)
     {
-      sim_phas_angl[j] = sim_phas_angl_default[j];
-    }
-  }
-  for(i=0; i<SIM_N_AEROSOL; i++)
-  {
-    sim_aers_phas[i] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
-    if(sim_aers_phas[i] == NULL)
-    {
-      fprintf(stderr,"%s: failed in allocating memory for %s\n",fnam,sim_aers_phas);
-      return -1;
+      sim_aers_phas[i] = (double *)malloc(sim_n_phas_wlen*sim_n_phas_angl*sizeof(double));
+      if(sim_aers_phas[i] == NULL)
+      {
+        fprintf(stderr,"%s: failed in allocating memory for %s\n",fnam,sim_aers_phas);
+        return -1;
+      }
     }
   }
 
@@ -2533,10 +2539,11 @@ int ReadMie(int iaer)
   FILE *fp;
 
   // allocate memory
+  mie_wlen = (double *)malloc(MIE_MAXDATA*sizeof(double));
   mie_aext = (double *)malloc(MIE_MAXDATA*sizeof(double));
   mie_asca = (double *)malloc(MIE_MAXDATA*sizeof(double));
   mie_asym = (double *)malloc(MIE_MAXDATA*sizeof(double));
-  if(mie_aext==NULL || mie_asca==NULL || mie_asym==NULL)
+  if(mie_wlen==NULL || mie_aext==NULL || mie_asca==NULL || mie_asym==NULL)
   {
     fprintf(stderr,"%s: failed in allocating memory\n",fnam);
     return -1;
@@ -2604,6 +2611,16 @@ int ReadMie(int iaer)
     {
       do
       {
+        if((dp=(double*)realloc(mie_wlen,mie_n_wlen*sizeof(double))) == NULL)
+        {
+          fprintf(stderr,"%s: error in allocating memory.\n",fnam);
+          err = 1;
+          break;
+        }
+        else
+        {
+          mie_wlen = dp;
+        }
         if((dp=(double*)realloc(mie_aext,mie_n_wlen*sizeof(double))) == NULL)
         {
           fprintf(stderr,"%s: error in allocating memory.\n",fnam);
@@ -2771,6 +2788,7 @@ int ReadMie(int iaer)
   while(0);
   if(err)
   {
+    free(mie_wlen);
     free(mie_aext);
     free(mie_asca);
     free(mie_asym);
