@@ -1721,6 +1721,35 @@ int MieInit(int iaer)
   int i,j,n;
   char fnam[] = "MieInit";
 
+  // mie_wlen
+  if((mie_n_wlen=ReadWlen(mie_aers_wav[iaer],MIE_MAXDATA,&mie_wlen)) < 0)
+  {
+    if((mie_wlen=(double*)malloc(MIE_N_WLEN*sizeof(double))) == NULL)
+    {
+      fprintf(stderr,"%s: error in allocating memory.\n",fnam);
+      return -1;
+    }
+    mie_n_wlen = MIE_N_WLEN;
+    for(j=0; j<mie_n_wlen; j++)
+    {
+      mie_wlen[j] = mie_wlen_default[j];
+    }
+  }
+  // mie_angl
+  if((mie_n_angl=ReadAngl(mie_aers_ang[iaer],MIE_MAXDATA,&mie_angl)) < 0)
+  {
+    if((mie_angl=(double*)malloc(MIE_N_ANGL*sizeof(double))) == NULL)
+    {
+      fprintf(stderr,"%s: error in allocating memory.\n",fnam);
+      return -1;
+    }
+    mie_n_angl = MIE_N_ANGL;
+    for(j=0; j<mie_n_angl; j++)
+    {
+      mie_angl[j] = mie_angl_default[j];
+    }
+  }
+
   mie_iref = -1;
   for(i=0; i<mie_n_wlen; i++)
   {
