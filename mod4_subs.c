@@ -451,7 +451,7 @@ int WriteCard2D_V4(FILE *fp)
 
   // CARD 2D
   fprintf(fp,"%5d%5d%5d%5d\n",sim_n_aers_wlen[0],sim_n_aers_wlen[1],sim_n_aers_wlen[2],sim_n_aers_wlen[3]);
-  for(n=0; n<4; n++)
+  for(n=0; n<SIM_N_AEROSOL; n++)
   {
     if(sim_n_aers_wlen[n] < 1)
     {
@@ -564,7 +564,7 @@ int WriteCard3C_V4(FILE *fp)
     for(i=0; i<sim_n_phas_wlen; i++)
     {
       k = sim_n_phas_angl*i+j;
-      cprintf(fp," %9.3e%s",sim_aer1_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
+      cprintf(fp," %9.3e%s",sim_aers_phas[0][k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C4
@@ -573,7 +573,7 @@ int WriteCard3C_V4(FILE *fp)
     for(i=0; i<sim_n_phas_wlen; i++)
     {
       k = sim_n_phas_angl*i+j;
-      fprintf(fp,"%10.3e%s",sim_aer2_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
+      fprintf(fp,"%10.3e%s",sim_aers_phas[1][k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C5
@@ -582,7 +582,7 @@ int WriteCard3C_V4(FILE *fp)
     for(i=0; i<sim_n_phas_wlen; i++)
     {
       k = sim_n_phas_angl*i+j;
-      fprintf(fp,"%10.3e%s",sim_aer3_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
+      fprintf(fp,"%10.3e%s",sim_aers_phas[2][k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C6
@@ -591,7 +591,7 @@ int WriteCard3C_V4(FILE *fp)
     for(i=0; i<sim_n_phas_wlen; i++)
     {
       k = sim_n_phas_angl*i+j;
-      fprintf(fp,"%10.3e%s",sim_aer4_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
+      fprintf(fp,"%10.3e%s",sim_aers_phas[3][k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   #else
@@ -603,7 +603,7 @@ int WriteCard3C_V4(FILE *fp)
     for(i=0; i<sim_n_phas_wlen; i++)
     {
       k = sim_n_phas_angl*i+j;
-      cprintf(fp,"%15.9e%s",sim_aer1_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
+      cprintf(fp,"%15.9e%s",sim_aers_phas[0][k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C4
@@ -612,7 +612,7 @@ int WriteCard3C_V4(FILE *fp)
     for(i=0; i<sim_n_phas_wlen; i++)
     {
       k = sim_n_phas_angl*i+j;
-      fprintf(fp,"%15.9e%s",sim_aer2_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
+      fprintf(fp,"%15.9e%s",sim_aers_phas[1][k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C5
@@ -621,7 +621,7 @@ int WriteCard3C_V4(FILE *fp)
     for(i=0; i<sim_n_phas_wlen; i++)
     {
       k = sim_n_phas_angl*i+j;
-      fprintf(fp,"%15.9e%s",sim_aer3_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
+      fprintf(fp,"%15.9e%s",sim_aers_phas[2][k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   // CARD 3C6
@@ -630,7 +630,7 @@ int WriteCard3C_V4(FILE *fp)
     for(i=0; i<sim_n_phas_wlen; i++)
     {
       k = sim_n_phas_angl*i+j;
-      fprintf(fp,"%15.9e%s",sim_aer4_phas[k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
+      fprintf(fp,"%15.9e%s",sim_aers_phas[3][k],i==sim_n_phas_wlen-1?"\n":i%8==7?"\n":"");
     }
   }
   #endif
