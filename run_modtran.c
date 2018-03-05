@@ -2703,7 +2703,6 @@ int ReadMie(int iaer)
       phs2[i] = v[3];
       phas[i] = v[4];
       i++;
-fprintf(stderr,"HERE\n");
     }
     if(err)
     {
