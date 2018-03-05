@@ -416,6 +416,7 @@ char	mod_path_v4[MAXLINE]		= MOD_PATH_V4;		// MODTRAN4 path
 char	mod_path_v5[MAXLINE]		= MOD_PATH_V5;		// MODTRAN5 path
 // Parameters for Profile
 int	prf_n_alt			= PRF_NALT;
+int	prf_haze_flag[PRF_NHAZ]		= {0,0,0,0};
 double	prf_alt[PRF_MAXNALT]		=
 {
    0.0,  1.0,  2.0,  3.0,  4.0,  5.0,  6.0,  7.0,
@@ -3404,6 +3405,7 @@ int PrfScaleMolecule(void)
 int PrfScaleAerosol(double t)
 {
   int i,j;
+  int flag;
   double f;
 
   if(!isnan(t))
@@ -3433,6 +3435,29 @@ int PrfScaleAerosol(double t)
       for(j=0; j<prf_n_alt; j++)
       {
         sim_prf_haze[i][j] = prf_haze[i][j];
+      }
+    }
+  }
+  else
+  {
+    flag = 0;
+    for(i=0; i<PRF_NHAZ; i++)
+    {
+      if(prf_haze_flag[i] == 1)
+      {
+        flag = 1;
+        break;
+      }
+    }
+    if(flag)
+    {
+      sim_2c |= 0x1000;
+      for(i=0; i<PRF_NHAZ; i++)
+      {
+        for(j=0; j<prf_n_alt; j++)
+        {
+          sim_prf_haze[i][j] = prf_haze[i][j];
+        }
       }
     }
   }
@@ -5588,6 +5613,7 @@ int ReadConfig(void)
           {
             break;
           }
+          prf_haze_flag[idx] = 1;
         }
       }
       if(cnt_hp && n>2 && cnt_n_cmnt<CNT_MAXCMNT)
