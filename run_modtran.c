@@ -2543,7 +2543,9 @@ int ReadMie(int iaer)
   mie_aext = (double *)malloc(MIE_MAXDATA*sizeof(double));
   mie_asca = (double *)malloc(MIE_MAXDATA*sizeof(double));
   mie_asym = (double *)malloc(MIE_MAXDATA*sizeof(double));
-  if(mie_wlen==NULL || mie_aext==NULL || mie_asca==NULL || mie_asym==NULL)
+  mie_angl = (double *)malloc(MIE_MAXDATA*sizeof(double));
+  if(mie_wlen==NULL || mie_aext==NULL || mie_asca==NULL ||
+     mie_asym==NULL || mie_angl==NULL)
   {
     fprintf(stderr,"%s: failed in allocating memory\n",fnam);
     return -1;
@@ -2701,6 +2703,7 @@ int ReadMie(int iaer)
       phs2[i] = v[3];
       phas[i] = v[4];
       i++;
+fprintf(stderr,"HERE\n");
     }
     if(err)
     {
@@ -2713,6 +2716,28 @@ int ReadMie(int iaer)
       fprintf(stderr,"%s: error, mie_n_angl=%d (%s)\n",fnam,mie_n_angl,mie_aers_inp2[iaer]);
       err = 1;
       break;
+    }
+    // resize memory
+    if(mie_n_angl != MIE_MAXDATA)
+    {
+      do
+      {
+        if((dp=(double*)realloc(mie_angl,mie_n_angl*sizeof(double))) == NULL)
+        {
+          fprintf(stderr,"%s: error in allocating memory.\n",fnam);
+          err = 1;
+          break;
+        }
+        else
+        {
+          mie_angl = dp;
+        }
+      }
+      while(0);
+      if(err)
+      {
+        break;
+      }
     }
     mie_phs1 = (double *)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
     mie_phs2 = (double *)malloc(mie_n_wlen*mie_n_angl*sizeof(double));
@@ -2792,6 +2817,7 @@ int ReadMie(int iaer)
     free(mie_aext);
     free(mie_asca);
     free(mie_asym);
+    free(mie_angl);
     free(mie_phs1);
     free(mie_phs2);
     free(mie_phas);
