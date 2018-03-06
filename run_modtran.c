@@ -127,7 +127,7 @@
 // Constants for Profile
 #define	PRF_HAZ_NALT			34
 #define	PRF_NALT			36
-#define	PRF_MAXNALT			1000
+#define	PRF_MAXNALT			500			// <LAYDIM in PARAMS.h
 #define	PRF_NMOL			12
 #define	PRF_NMOLX			13
 #define	PRF_NMOLY			16
