@@ -14,7 +14,7 @@
 #define	LAYDIM				502	// MAXIMUM NUMBER OF LAYER BOUNDARY.
 #define	MXIREG				4
 #define	MXNSRF				2
-#define	MXNSPC				47
+#define	MXNSPC				788
 #define	NCOL3				3
 #define	NCOL4				4
 #define	NCOL5				5
