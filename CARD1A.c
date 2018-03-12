@@ -61,7 +61,7 @@ char CARD1A_description[CARD1A_NPAR][MAXLINE] =
 {
   "DISORT multiple scattering algorighm",
   "azimuth dependence flag",
-  "spherical albedo flag"
+  "spherical albedo flag",
   "number of streams",
   "solar irradiance from a file",
   "FWHM of the triangular scanning function",
@@ -74,7 +74,7 @@ char CARD1A_description[CARD1A_NPAR][MAXLINE] =
   "band model file name from CARD 1A2",
   "instrument filter file name from CARD 1A3",
   "reflect the changes of RH profile",
-  "directory name from CARD 1A4"
+  "directory name from CARD 1A4",
   "scaling of the solar irradiance",
   "perturb both the BL/tropospheric aerosol",
   "Angstrom coefficient",
