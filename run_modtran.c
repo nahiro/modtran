@@ -12,7 +12,7 @@
 #include <getopt.h>
 #include <errno.h>
 #include <math.h>
-#include <bits/nan.h>
+//#include <bits/nan.h>
 #include <complex.h>
 #include <time.h>
 #include <sys/time.h>
@@ -8258,7 +8258,7 @@ int GetOpt(int argn,char **args)
       case 'N':
         errno = 0;
         ntmp = strtol(optarg,&endp,10);
-        if(errno!=ERANGE && *endp=='\0' && (ntmp==2||ntmp==4||ntmp==8||ntmp==16||ntmp==32)) sim_nstr = ntmp;
+        if(errno!=ERANGE && *endp=='\0' && ntmp%2==0 && ntmp<=512) sim_nstr = ntmp;
         else
         {
           fprintf(stderr,"Number of streams for DISORT -> out of range %s\n",optarg);
@@ -8384,7 +8384,7 @@ int Usage(void)
   fprintf(stderr," b -sim_dbmp      |%s|%s|%s| %d\n",As(e,"DSR Band model",n), As(a,"-1|1|5|15",n),  Ad(d,SIM_DBMP,n),sim_dbmp);
   fprintf(stderr," B -sim_sbmp      |%s|%s|%s| %d\n",As(e,"SSR Band model",n), As(a,"-1|1|5|15",n),  Ad(d,SIM_SBMP,n),sim_sbmp_init);
   fprintf(stderr," n -sim_nsam      |%s|%s|%s| %d\n",As(e,"SSR #Sampling",n),  As(a,"#",n),          Ad(d,SIM_NSAM,n),sim_nsam_init);
-  fprintf(stderr," N -sim_nstr      |%s|%s|%s| %d\n",As(e,"#Streams",n),       As(a,"2|4|8|16|32",n),Ad(d,SIM_NSTR,n),sim_nstr);
+  fprintf(stderr," N -sim_nstr      |%s|%s|%s| %d\n",As(e,"#Streams",n),       As(a,"2|4|8|...|512",n),Ad(d,SIM_NSTR,n),sim_nstr);
   fprintf(stderr," S -sim_mode      |%s|%s|%s| %d\n",As(e,"Execution mode",n), As(a,"1~8",n),        Ad(d,SIM_MODE_DSR_MODTRAN_BO,n),sim_mode);
   fprintf(stderr," M -cnt_version   |%s|%s|%s| %d\n",As(e,"MODTRAN version",n),As(a,"4000|5000",n),  Ad(d,MOD_V4,n),cnt_version);
   fprintf(stderr," m -cnt_xmod      |%s|%s|%s| %d\n",As(e,"Mixing mode",n),    As(a,"0|1|2",n),      Ad(d,0,n),cnt_xmod);
