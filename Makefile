@@ -18,7 +18,7 @@ OBJ4				= $(BINDIR)/MIEV0.o $(BINDIR)/ErrPack.o
 OBJ5				= $(BINDIR)/tmx.o $(BINDIR)/lpd.o
 OBJS				= $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5)
 WARNING				= -Wall -Wno-misleading-indentation
-PROGRAM				= run_modtran run_modtran5 solar_radiation write_tape5
+PROGRAM				= run_modtran run_modtran_org solar_radiation write_tape5 write_tape5_org
 
 #==========================================
 all				: $(PROGRAM)
