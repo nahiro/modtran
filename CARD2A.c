@@ -78,7 +78,7 @@ void CARD2A_print(const TAPE5_struct *t,FILE *fp)
   {
     for(n=3; n<CARD2A_NPAR+3; n++)
     {
-      fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD2A_ID,CARD2A_name[n],CARD2A_to_s(t->card2a,n,s),CARD2A_description[n]);
+      fprintf(fp,"%-4s %-18s %-15s # %s\n",CARD2A_ID,CARD2A_name[n-3],CARD2A_to_s(t->card2a,n-3,s),CARD2A_description[n]);
     }
   }
   else

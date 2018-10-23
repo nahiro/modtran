@@ -12,7 +12,7 @@
 #include <getopt.h>
 #include <errno.h>
 #include <math.h>
-#include <bits/nan.h>
+//#include <bits/nan.h>
 #include <complex.h>
 #include <time.h>
 #include <sys/time.h>
